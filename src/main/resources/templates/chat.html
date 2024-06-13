@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body{            background-image: url("/assets/mainPageBackground.jpg");
+        }
+        .container {
+            max-width: 10000px;
+            display: flex;
+            margin-top: 15px;
+
+        }
+        .projects-container {
+            width: 100%;
+            height: 980px;
+            border: 1px solid #0016a6;
+            padding: 10px;
+        }
+        .projects-list {
+            overflow-y: auto;
+            overflow-x: hidden;
+            max-height: 100%;
+        }
+        .message {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #b0b0b0;
+            width: calc(100% - 1500px);
+            display: flex;
+            flex-direction: column;
+        }
+        .message-left {
+            margin-right: auto;
+        }
+        .message-right {
+            margin-left: auto;
+        }
+        .message-author {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #000742;
+        }
+        .message-text {
+            font-size: 1.2em;
+            line-height: 1.5;
+            color: #000000;
+            width: 80%;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            color: #ffffff;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            background-color: #021d44;
+            border: 1px solid transparent;
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: .25rem;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            color: #ffffff;
+            background-color: #5d5d5d;
+            border-color: #bbb4b4;
+        }
+    </style>
+</head>
+<body layout:fragment="body">
+<div class="container" >
+    <div class="projects-container">
+        <div class="projects-list">
+            <div th:each="message : ${messages}">
+                <div th:if="${message.author} == ${user.username}">
+                    <div class="message message-right" style="position: relative">
+                        <div style="display: flex; justify-content: space-between;flex-grow: 1;">
+                            <div>
+                                <p class="message-author">You:</p>
+                                <p class="message-text" th:text="${message.text}"></p>
+                            </div>
+                            <div  style="position: absolute ; right: 0px ; bottom:0px;">
+                                <p class="message-text" th:text="${message.pubDate}"></p>
+                            </div>
+                            <form style="position: absolute;right: 5px; top: 0;" method="post" th:action="@{/comments/{chatId}/delete/{messageId}(chatId=${message.getChat().id},messageId=${message.id})}">
+                                <button class="btn btn-primary"> Delete </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${message.author} != ${user.username}">
+                    <div class="message message-left">
+                        <div style="display: flex; justify-content: space-between; flex-grow: 1;">
+                            <div>
+                                <p class="message-author" th:text="${message.author}"></p>
+                                <p class="message-text" th:text="${message.text}"></p>
+                            </div>
+                        </div>
+                        <div style="align-self: flex-end; text-align: right;">
+                            <p class="message-text" th:text="${message.pubDate}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container" style="margin-top: 30px">
+    <!-- Form for adding message -->
+    <form th:action="@{/messages/{chatId}/save(chatId=${chatId})}" method="post">
+        <textarea id="commentText" name="text" placeholder="write your message ..." required rows="7" cols="200" style="resize: none;" maxlength="300" oninput="updateCharCount()"></textarea>
+        <div style="color: white">
+            <span id="charCount">0</span>/300 characters used
+        </div>
+        <input type="hidden" th:value="${chatId}" name="chat" />
+        <button type="submit" class="btn" style="margin-bottom: 50px;">Send</button>
+    </form>
+
+    <script>
+        function updateCharCount() {
+            const textarea = document.getElementById('commentText');
+            const charCount = textarea.value.length;
+            document.getElementById('charCount').textContent = charCount;
+        }
+
+        // Initialize the character count on page load
+        document.addEventListener('DOMContentLoaded', (event) => {
+            updateCharCount();
+        });
+    </script>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout=”http://www.ultraq.net.nz/thymeleaf/layout”
+      xmlns:sec="http://www/thymeleaf.org"
+      layout:decorate="~{layout}"
+      xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+
+            background-image: url("/assets/detailPage.jpg");
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-size: cover;
+        }
+        .news-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 20px;
+            gap: 20px;
+        }
+    </style>
+
+</head>
+<body>
+<section layout:fragment="body">
+
+    <div class="col-md-12"  style="margin-top: 20px">
+
+        <div>
+            <div class="row" style="padding: 20px" >
+                <div class="col-md-4" th:if="${!#strings.isEmpty(news.imageUrl)}">
+                    <a href="#!">
+                        <img class="img-fluid" th:src="${news.imageUrl}" alt="News Photo" style="float: left; margin-right: 10px; margin-bottom: 10px; object-fit: cover; width: 800px; height: 700px;" />
+                    </a>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <strong><h2 class="card-title" th:text="${news.title}" style="font-family: 'Georgia', serif; color: #2c2c2c;"></h2></strong>
+                        <p class="card-text" th:text="${news.description}" style="font-family: 'Times New Roman', sans-serif; color: #0a0a0a; font-size: x-large"></p>
+                        <h5 class="card-title" style="font-family: 'Arial', sans-serif; color: #000000;"><strong>Creators:</strong>
+                            <span th:if="${#lists.isEmpty(news.creator)}">no specified</span>
+                            <span th:each="creator : ${news.creator}" th:text="${creator}+' '" style="font-family: 'Arial', sans-serif; color: #000000;"></span>
+                        </h5>
+                        <h5 class="card-title" style="font-family: 'Arial', sans-serif; color: #000000;"><strong>Countries:</strong>
+                            <span th:if="${#lists.isEmpty(news.country)}">no specified</span>
+                            <span th:each="country : ${news.country}" th:text="${country}+' '" style="font-family: 'Arial', sans-serif; color: #000000;"></span>
+                        </h5>
+                        <h5 class="card-title" style="font-family: 'Arial', sans-serif; color: #000000;"><strong>Categories:</strong>
+                            <span th:if="${#lists.isEmpty(news.category)}">no specified</span>
+                            <span th:each="category : ${news.category}" th:text="${category}+' '" style="font-family: 'Arial', sans-serif; color: #000000;"></span>
+                        </h5>
+                        <h5 class="card-title" style="font-family: 'Arial', sans-serif; color: #000000;"><strong>Views:</strong>
+                            <span th:text="${news.pageVisitingCount}" style="font-family: 'Arial', sans-serif; color: #000000;"></span>
+                        </h5>
+                        <strong>Likes: </strong><span th:text="${news.likes}"/>
+                        <strong>Dislikes: </strong><span th:text="${news.dislikes}"/>
+
+                        <form th:action="@{/news/actions/{newsId}(newsId=${news.id})}" method="post">
+                            <button name="interaction" value="like" type="submit" style="width: 50px; height: 50px;">👍</button>
+                            <button name="interaction" value="dislike" type="submit" style="width: 50px; height: 50px;">👎</button>
+                        </form>
+                        <div th:if="${user!=null and user.hasAdminRole()}" style="margin-top: 10px; display: flex;">
+                            <a class="btn btn-primary" th:href="@{/news/update/{newsId}(newsId = ${news.id})}"> Update news</a>
+                            <form  style="margin-left: 5px" method="post" th:action="@{/news/delete/{newsId}(newsId = ${news.id})}">
+                                <button class="btn btn-primary"> Delete news</button>
+                            </form>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        </br>
+
+        <iframe controls width="300" th:src="${news.videoUrl}" style="width: 600px"></iframe>
+
+        <div th:if="${intereStingNews != null and !#lists.isEmpty(intereStingNews.getData())}">
+            <hr style="border: 2px solid #ccc; border-color: #032738">
+            <h2 style="font-size: 2em; font-weight: bold; margin-left: 20px">Can be interesting:</h2>
+            <div th:if="${intereStingNews != null}" class="news-container">
+            <div th:each="news, iterStat : ${intereStingNews.getData()}">
+                <div class="card mb-4">
+                    <div class="card-body" style="height: 400px;width: 400px">
+                        <h5 class="card-title" th:text="${news.title}"></h5>
+                        <p class="card-text">
+                            <strong>Published Date:</strong> <span th:text="${news.pubdate}"></span><br/>
+                            <strong>Categories:</strong>
+                            <span th:each="category : ${news.category}" th:text="${category}+' '"></span>
+                            <span th:if="${#lists.isEmpty(news.category)}">no specified</span>
+                            <br/><strong>Language :</strong> <span th:text="${news.language}"></span><br/>
+                            <strong>Views: </strong><span th:text="${news.pageVisitingCount}"></span>
+                        </p>
+                    </div>
+                    <a class="btn btn-primary" th:href="@{/news/{newsId}(newsId = ${news.id})}">Detail</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+    <div style="margin-top: 20px">
+        <hr style="border: 2px solid #ccc; border-color: #032738">
+        <!-- Comments -->
+        <div class="col-lg-8" style="padding: 20px">
+            <div style="display: flex; align-items: center;">
+                <h2 class="club-title" style="font-size: 2em; font-weight: bold; margin-right: 10px;">Comments:</h2>
+                <span class="badge badge-pill badge-secondary" th:text="'('+${news.commentsCount}+')'" style="font-size: 1.5em;"></span>
+            </div>
+
+            <!-- Form for adding comment -->
+            <form th:action="@{/comments/{newsId}/save(newsId=${news.id})}" method="post">
+                <textarea name="text" placeholder="write your comment ..." required rows="7" cols="200" style="resize: none;"></textarea>
+                <input type="hidden" th:value="${news.id}" name="club" />
+                <button type="submit" class="btn btn-secondary"style=" margin-bottom: 50px;">Send</button>
+            </form>
+            <!--List of all comments-->
+            <div th:each="comment : ${comments}">
+                <div class="comment" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; position: relative; width: 1000px; background-color: #b0b0b0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>
+                            <p class="message-author" th:text="${comment.author}+':'" style="font-size: 1.2em; font-weight: bold; color: #000742;"></p>
+                            <p class="message-text" th:text="${comment.text}" style="font-size: 1.2em; line-height: 1.5; color: #000000;"></p>
+                        </div>
+                        <div style="align-self: flex-start; text-align: right;">
+                            <p class="message-text" th:text="${comment.pubDate}" style="font-size: 1.2em; line-height: 1.5; color: #000000;"></p>
+                            <form th:if="${user != null and (user.getComments().contains(comment) or user.hasAdminRole())}" th:action="@{/comments/{newsId}/delete/{commentId}(newsId=${news.id}, commentId=${comment.id})}" method="post">
+                                <button type="submit" class="btn btn-danger" style="position: absolute; bottom: 0; left: 5px;">Delete</button>
+                            </form>
+                            <strong>Likes: </strong><span th:text="${comment.likes}"></span>
+                            <strong>Dislikes: </strong><span th:text="${comment.dislikes}"></span>
+                            <form th:action="@{/news/actions/{newsId}/comments/{commentId}(newsId=${news.id},commentId=${comment.id})}" method="post">
+                                <button name="interaction" value="like" type="submit" style="width: 50px; height: 50px;">👍</button>
+                                <button name="interaction" value="dislike" type="submit" style="width: 50px; height: 50px;">👎</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>
