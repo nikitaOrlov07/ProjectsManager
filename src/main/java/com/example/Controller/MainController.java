@@ -2,15 +2,18 @@ package com.example.Controller;
 
 import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
+import com.example.Model.Task;
 import com.example.Security.SecurityUtil;
 import com.example.Service.ProjectService;
 import com.example.Service.Security.UserService;
+import com.example.Service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
@@ -20,14 +23,14 @@ import java.util.Map;
 
 @Controller
 public class MainController {
-    private ProjectService projectService;
-    private UserService userService;
+    private ProjectService projectService; private UserService userService; private TaskService taskService;
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     @Autowired
-    public MainController(ProjectService projectService, UserService userService) {
+    public MainController(ProjectService projectService, UserService userService,TaskService taskService) {
         this.projectService = projectService;
         this.userService = userService;
+        this.taskService = taskService;
     }
 
 
@@ -66,8 +69,15 @@ public class MainController {
 
 
     // Detail page
-    public String detailPage(Model model)
+    @GetMapping("/projects/{projectId}")
+    public String detailPage(@PathVariable("projectId") Long projectId, Model model)
     {
+        Project project = projectService.findById(projectId);
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+
+        model.addAttribute("user", user);
+        model.addAttribute("project", project);
+        model.addAttribute("tasks", project.getTasks());
         return "detail-page";
     }
     //------------------------------------------------------------ Search projects-----------------------------------------------------------------

@@ -14,15 +14,17 @@ import java.util.*;
 
 @Service
 public class ProjectServiceimpl implements ProjectService {
-    private ProjectRepository projectRepository; private UserRepository userRepository;
+    private ProjectRepository projectRepository;
+    private UserRepository userRepository;
+
     @Autowired
     public ProjectServiceimpl(ProjectRepository projectRepository, UserRepository userRepository) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
     }
-    public List<Project>  findAllProjects()
-    {
-       return projectRepository.findAll();
+
+    public List<Project> findAllProjects() {
+        return projectRepository.findAll();
     }
 
     @Override
@@ -32,14 +34,17 @@ public class ProjectServiceimpl implements ProjectService {
     }
 
     @Override
-    public List<Project> search(String query,String type) {
-        if(type.equals("allProjects")) {
+    public List<Project> search(String query, String type) {
+        if (type.equals("allProjects")) {
             return projectRepository.searchAllProjects(query);
-        }
-        else if(type.equals("userProjects"))
-        {
+        } else if (type.equals("userProjects")) {
             return projectRepository.searchUserProjects(query);
         }
         return null;
+    }
+
+    @Override
+    public Project findById(Long projectId) {
+        return projectRepository.findById(projectId).get();
     }
 }

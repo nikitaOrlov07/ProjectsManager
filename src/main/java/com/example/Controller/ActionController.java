@@ -71,12 +71,13 @@ public class ActionController {
     @GetMapping("/chat/{chatId}")
     public String getChat(@PathVariable("chatId") Long chatId, Model model)
     {
-        if(SecurityUtil.getSessionUser() == null || SecurityUtil.getSessionUser().isEmpty())
+        Chat chat = chatService.findById(chatId).get();
+        List<Message> messages = messageService.findAllChatMessage(chatId);
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        if(SecurityUtil.getSessionUser() == null || SecurityUtil.getSessionUser().isEmpty() || (!chat.getParticipants().contains(currentUser)))
         {
             return  "redirect:/home";
         }
-        List<Message> messages = messageService.findAllChatMessage(chatId);
-        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
         model.addAttribute("messages", messages);
         model.addAttribute("user",currentUser);
         return "chat";

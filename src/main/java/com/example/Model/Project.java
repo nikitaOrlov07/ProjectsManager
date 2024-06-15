@@ -27,7 +27,6 @@ public class Project {
     @ManyToMany(mappedBy = "currentProjects")
     private List<UserEntity> involvedUsers = new ArrayList<>();
 
-
-
-
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Task> tasks = new ArrayList<>();
 }

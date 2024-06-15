@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .authorizeRequests(authorize -> authorize
                         .requestMatchers(new AntPathRequestMatcher("/home")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/home/find")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/projects/{projectId}")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/assets/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/register/**")).permitAll()

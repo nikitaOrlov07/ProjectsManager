@@ -1,6 +1,7 @@
 package com.example.Service;
 
 import com.example.Model.Project;
+import com.example.Model.Security.UserEntity;
 import com.example.Repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -12,5 +13,7 @@ public interface ProjectService {
     List<Project> findUsersProjects();
 
     List<Project> search(String query,String type);
+
+    Project findById(Long projectId);
 
 }
