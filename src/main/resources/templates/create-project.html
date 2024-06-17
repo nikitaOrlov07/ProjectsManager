@@ -1,0 +1,112 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>News Create</title>
+    <style>
+        .btn {
+            display: inline-block;
+            font-weight: 400;
+            color: #212529;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            background-color: #818b9a;
+            border: 1px solid transparent;
+            padding: .375rem .75rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: .25rem;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            margin-top: 20px; /* Добавлен отступ сверху */
+        }
+        .btn:hover {
+            color: #ffffff;
+            background-color: #9a9a9a;
+            border-color: #bbb4b4;
+        }
+        .text-color {
+            color: white;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <form role="form" method="post" th:action="@{/projects/create/save}" th:object="${projectDto}">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="name" class="text-color">Name:</label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="name"
+                                name="name"
+                                th:field="*{name}"
+                                placeholder="Title">
+                        <p th:if="${#fields.hasErrors('name')}" class="text-danger" th:errors="*{name}"></p>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="description" class="text-color">Description:</label>
+                        <textarea
+                                class="form-control"
+                                id="description"
+                                name="description"
+                                th:field="*{description}"
+                                style="width: 1000px; height: 250px"></textarea>
+                        <p th:if="${#fields.hasErrors('description')}" class="text-danger" th:errors="*{description}"></p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="category" class="text-color">Category:</label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="category"
+                                name="category"
+                                th:field="*{category}"
+                                placeholder="category">
+                        <p th:if="${#fields.hasErrors('category')}" class="text-danger" th:errors="*{category}"></p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="startDate" class="text-color">Start Date:</label>
+                        <input
+                                type="date"
+                                class="form-control"
+                                id="startDate"
+                                name="startDate"
+                                th:field="*{startDate}"
+                                placeholder="start date">
+                        <p th:if="${#fields.hasErrors('startDate')}" class="text-danger" th:errors="*{startDate}"></p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="endDate" class="text-color">End Date:</label>
+                        <input
+                                type="date"
+                                class="form-control"
+                                id="endDate"
+                                name="endDate"
+                                th:field="*{endDate}"
+                                placeholder="end date">
+                        <p th:if="${#fields.hasErrors('endDate')}" class="text-danger" th:errors="*{endDate}"></p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="password" class="text-color">Password:</label>
+                        <input
+                                type="password"
+                                class="form-control"
+                                id="password"
+                                name="password"
+                                th:field="*{password}"
+                                placeholder="password">
+                        <p th:if="${#fields.hasErrors('password')}" class="text-danger" th:errors="*{password}"></p>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

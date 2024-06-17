@@ -1,7 +1,9 @@
 package com.example.Controller;
 
+import com.example.Dto.ProjectDto;
 import com.example.Model.Chat;
 import com.example.Model.Message;
+import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
 import com.example.Security.SecurityUtil;
 import com.example.Service.ChatService;
@@ -115,5 +117,53 @@ public class ActionController {
         user.getMessages().remove(message);
         messageService.deleteMessage(message,user,chat);
         return "redirect:/chat/" + chatId;
+    }
+    //----------------------------------------------------------------Projects----------------------------------------------------------------
+    @PostMapping("/projects/addProject/{projectId}")
+    public String addProject(@PathVariable("projectId") Long projectId)
+    {
+      UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+      Project project = projectService.findById(projectId);
+      user.getCurrentProjects().add(projectService.findById(projectId));
+      project.getInvolvedUsers().add(user);
+      logger.info("adding project logic working");
+      userService.save(user); projectService.save(project);
+      return "redirect:/projects/" +projectId;
+    }
+    @PostMapping("/projects/removeProject/{projectId}")
+    public String removeProject(@PathVariable("projectId") Long projectId)
+    {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        Project project = projectService.findById(projectId);
+        user.getCurrentProjects().remove(project);
+        project.getInvolvedUsers().remove(user);
+        userService.save(user); projectService.save(project);
+        return "redirect:/projects/" +projectId;
+    }
+    @GetMapping("/projects/create")
+    public String createProject(RedirectAttributes redirectAttributes,
+                                Model model)
+    {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        if(user == null)
+        {
+            redirectAttributes.addFlashAttribute("loginError", "You must be logged in");
+            return "redirect:/login";
+        }
+        ProjectDto projectDto = new ProjectDto();
+        model.addAttribute("projectDto", projectDto);
+        return "create-project";
+    }
+    @PostMapping("/projects/create/save")
+    public String createProject(@ModelAttribute("project") Project project , RedirectAttributes redirectAttributes)
+    {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        if(user == null)
+        {
+            redirectAttributes.addFlashAttribute("loginError", "You must be logged in");
+            return "redirect:/login";
+        }
+        projectService.save(project);
+        return "redirect:/projects/" + project.getId();
     }
 }

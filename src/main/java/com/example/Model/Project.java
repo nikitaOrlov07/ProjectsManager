@@ -22,7 +22,7 @@ public class Project {
     private String category;
     private String startDate;
     private String endDate;
-
+    private  String password;
     @ToString.Exclude
     @ManyToMany(mappedBy = "currentProjects")
     private List<UserEntity> involvedUsers = new ArrayList<>();

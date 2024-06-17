@@ -1,5 +1,6 @@
 package com.example.Controller;
 
+import com.example.Dto.TaskDto;
 import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
 import com.example.Model.Task;
@@ -70,7 +71,8 @@ public class MainController {
 
     // Detail page
     @GetMapping("/projects/{projectId}")
-    public String detailPage(@PathVariable("projectId") Long projectId, Model model)
+    public String detailPage(@PathVariable("projectId") Long projectId
+                             , Model model)
     {
         Project project = projectService.findById(projectId);
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
@@ -78,6 +80,7 @@ public class MainController {
         model.addAttribute("user", user);
         model.addAttribute("project", project);
         model.addAttribute("tasks", project.getTasks());
+        model.addAttribute("taskDto",new TaskDto());
         return "detail-page";
     }
     //------------------------------------------------------------ Search projects-----------------------------------------------------------------

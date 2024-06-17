@@ -15,5 +15,6 @@ public interface ProjectService {
     List<Project> search(String query,String type);
 
     Project findById(Long projectId);
+    void save (Project project);
 
 }

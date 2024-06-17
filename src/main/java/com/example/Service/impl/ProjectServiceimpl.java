@@ -47,4 +47,9 @@ public class ProjectServiceimpl implements ProjectService {
     public Project findById(Long projectId) {
         return projectRepository.findById(projectId).get();
     }
+
+    @Override
+    public void save(Project project) {
+        projectRepository.save(project);
+    }
 }
