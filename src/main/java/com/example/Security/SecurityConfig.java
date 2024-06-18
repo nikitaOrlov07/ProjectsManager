@@ -31,25 +31,18 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/home")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/home/find")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/projects/{projectId}")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/chat/{chatId}")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/static/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/assets/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/css/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/js/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/register/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/static/css/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/static/js/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/static/assets/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
-                        // own security logic in controller
-                        .requestMatchers(new AntPathRequestMatcher("/news/actions/{newsId}")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/news/actions/{newsId}/comments/{commentId}")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/comments/{newsId}/save")).permitAll()
-
-                        .requestMatchers(new AntPathRequestMatcher("/news/delete/{newsId}")).hasAuthority("ADMIN")
-                        .requestMatchers(new AntPathRequestMatcher("/users/delete/{userId}")).permitAll()
                         // nobody can delete ADMIN user (even ADMIN himself)
                         .requestMatchers(new AntPathRequestMatcher("/users/delete/1")).denyAll()
                         .anyRequest().authenticated()) //other URLs are only allowed authenticated users.
 
-                // Это указывает, что запросы к определенным URL-адресам должны быть разрешены для всех пользователей, включая анонимных.
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/home?successLogin",true)

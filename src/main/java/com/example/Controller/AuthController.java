@@ -62,7 +62,7 @@ public class AuthController { // for Security
         }
 
         userService.saveUser(user);
-        return "redirect:/home?success";
+        return "redirect:/login";
     }
     //Login
     @GetMapping("/login")

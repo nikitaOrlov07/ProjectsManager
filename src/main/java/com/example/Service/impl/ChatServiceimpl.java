@@ -45,4 +45,9 @@ public class ChatServiceimpl implements ChatService {
         System.out.println("was returned new chat");
         return newChat;
     }
+
+    @Override
+    public void save(Chat chat) {
+        chatRepository.save(chat);
+    }
 }

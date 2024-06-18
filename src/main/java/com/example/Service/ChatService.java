@@ -12,4 +12,6 @@ public interface ChatService {
     void updateChat(Chat chat);
 
     Chat findOrCreateChat(UserEntity currentUser, UserEntity secondUser);
+
+    void save(Chat chat);
 }

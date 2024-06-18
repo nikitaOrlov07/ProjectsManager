@@ -8,18 +8,21 @@ import com.example.Security.SecurityUtil;
 import com.example.Service.ProjectService;
 import com.example.Service.Security.UserService;
 import com.example.Service.TaskService;
+import com.example.mappers.TaskMapper;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Collections;
+import java.util.List;
 
 @Controller
 public class TaskController {
@@ -45,22 +48,21 @@ public class TaskController {
         return "redirect:/projects/" + task.getProject().getId(); // Перенаправление на страницу проекта
     }
     // Ajax validation
-    @PostMapping("/ajax/tasks/create")
-    public String ajaxCreateTask(@Valid @ModelAttribute("taskDto") TaskDto taskDto,
-                                 BindingResult result,
-                                 @RequestParam("projectId") Long projectId,
-                                 Model model) {
-        if (result.hasErrors() || taskDto.getName().isEmpty() || taskDto.getDescription().isEmpty()) {
-            System.out.println("ВАЛИДАЦИЯ СРАБАТЫВАЕТ");
-            model.addAttribute("taskDto", taskDto);
-            model.addAttribute("project", projectService.findById(projectId));
-            return "detail-page :: addTask";
+    @PostMapping("/tasks/create")
+    public ResponseEntity<String> ajaxCreateTask(@RequestBody TaskDto taskDto,
+                                                 @RequestParam("projectId") Long projectId) {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        Project project = projectService.findById(projectId);
+
+        if (user == null || (!project.getInvolvedUsers().contains(user))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
         }
 
-        // Логика создания задачи
-        taskDto.setProject(projectService.findById(projectId));
-        // Сохранение задачи...
-
-        return "success";
+        Task task = TaskMapper.getTaskFromTaskDto(taskDto);
+        task.setProject(project);
+        taskService.save(task);
+        logger.info("Task created");
+        return ResponseEntity.ok("success");
     }
+
 }

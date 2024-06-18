@@ -29,5 +29,7 @@ public class Chat {
     @ToString.Exclude
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
+    @OneToOne(mappedBy = "chat", orphanRemoval = true)
+    private Project project;
 
 }

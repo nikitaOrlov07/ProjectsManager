@@ -4,7 +4,7 @@ import com.example.Dto.TaskDto;
 import com.example.Model.Task;
 
 public class TaskMapper {
-    static Task getTaskFromTaskDto(TaskDto taskDto)
+    public  static Task getTaskFromTaskDto(TaskDto taskDto)
     {
         Task task = Task.builder()
                 .name(taskDto.getName())

@@ -104,6 +104,11 @@ public class UserServiceimpl implements UserService{
         userRepository.save(currentUser);
     }
 
+    @Override
+    public void delete(UserEntity deletedUser) {
+        userRepository.delete(deletedUser);
+    }
+
 
     @Override
     public List<UserEntity> findAllUsers() {

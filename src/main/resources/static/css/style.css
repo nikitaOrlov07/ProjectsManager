@@ -1,0 +1,150 @@
+.container {
+    max-width: 10000px;
+    display: flex;
+    gap: 20px;
+}
+body {
+    background-image: url("/assets/mainPageBackground.jpg");
+}
+.projects-container {
+    width: 40%;
+    height: 1000px;
+    border: 1px solid #0016a6;
+    padding: 10px;
+}
+.projects-list {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 850px;
+}
+.card {
+    position: relative;
+    padding-bottom: 40px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    max-width: 750px;
+}
+.detail-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    background-color: #8f8f8f;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+    height: 90%;
+}
+
+.user-info .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+
+.user-info .details {
+    flex-grow: 1;
+}
+
+.user-info .details p {
+    margin-bottom: 5px;
+}
+
+.user-info .details .username {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.user-info .details .label {
+    font-weight: bold;
+}
+body {
+
+    background-color: #6e6e6e;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-size: cover;
+}
+
+footer {
+    margin-top: auto;
+}
+.task-list {
+    margin-top: 20px;
+}
+
+.progress {
+    height: 25px;
+    background-color: #e6e6e6;
+    border-radius: 15px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #4caf50;
+    border-radius: 15px;
+    transition: width 0.4s ease;
+    position: relative;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.progress-bar::before {
+    content: attr(aria-valuenow) '%';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.tasks-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tasks {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.tasks:hover {
+    background-color: #f0f0f0;
+}
+
+.tasks label {
+    margin-left: 10px;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+.users-list {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 850px;
+    width: 2500px;
+}
+
+.form-group textarea {
+    resize: none;
+}

@@ -7,91 +7,9 @@
 <head>
     <title>Project Details</title>
     <style>
-        .container {
-            max-width: 10000px;
-            display: flex;
-            gap: 20px;
-            margin-left: 20px;
-        }
 
         body {
             background-image: url("/assets/detailPage.jpg");
-        }
-
-        .projects-container {
-            width: 40%;
-            height: 1000px;
-            border: 1px solid #0016a6;
-            padding: 10px;
-        }
-
-        .task-list {
-            margin-top: 20px;
-        }
-
-        .progress {
-            height: 25px;
-            background-color: #e6e6e6;
-            border-radius: 15px;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background-color: #4caf50;
-            border-radius: 15px;
-            transition: width 0.4s ease;
-            position: relative;
-            box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-        }
-
-        .progress-bar::before {
-            content: attr(aria-valuenow) '%';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ffffff;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        .tasks-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .tasks {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s ease;
-        }
-
-        .tasks:hover {
-            background-color: #f0f0f0;
-        }
-
-        .tasks label {
-            margin-left: 10px;
-            font-family: 'Arial', sans-serif;
-            color: #333;
-        }
-
-        .users-list {
-            overflow-y: auto;
-            overflow-x: hidden;
-            height: 850px;
-            width: 2500px;
-        }
-
-        .form-group textarea {
-            resize: none;
         }
     </style>
 </head>
@@ -119,14 +37,18 @@
             </span>
                 </strong>
                 <div style="margin-top: 20px;">
-                    <form th:if="${user != null and user.currentProjects != null and !user.currentProjects.contains(project) and project.involvedUsers != null and !project.involvedUsers.contains(user)}"
-                          method="post" th:action="@{/projects/addProject/{projectId}(projectId=${project.id})}">
-                        <button class="btn btn-primary">Add</button>
-                    </form>
-                    <form th:if="${user != null and user.currentProjects != null and user.currentProjects.contains(project) and project.involvedUsers != null and project.involvedUsers.contains(user)}"
-                          method="post" th:action="@{/projects/removeProject/{projectId}(projectId=${project.id})}">
-                        <button class="btn btn-primary">Remove</button>
-                    </form>
+                    <div style="display: inline-block;">
+                        <form th:if="${user != null and user.currentProjects != null and !user.currentProjects.contains(project) and project.involvedUsers != null and !project.involvedUsers.contains(user)}"
+                              method="post" th:action="@{/projects/addProject/{projectId}(projectId=${project.id})}" style="display: inline-block;">
+                            <button class="btn btn-primary">Add</button>
+                        </form>
+                        <form th:if="${user != null and user.currentProjects != null and user.currentProjects.contains(project) and project.involvedUsers != null and project.involvedUsers.contains(user)}"
+                              method="post" th:action="@{/projects/removeProject/{projectId}(projectId=${project.id})}" style="display: inline-block;">
+                            <button class="btn btn-primary">Remove</button>
+                        </form>
+                        <a th:if="${user != null and project.involvedUsers.contains(user)}" th:href="@{/project/{projectId}/chat/{chatId}(chatId=${project.chat.id},projectId=${project.id})}" class="btn btn-primary" style="display: inline-block; margin-left: 10px;">Chat</a>
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -141,7 +63,10 @@
             <div th:if="${user == null}" class="alert alert-info">
                 You must login
             </div>
-            <div th:if="${user != null and project.tasks != null and project.tasks.isEmpty()}" class="alert alert-light">
+            <div th:if="${user != null and !project.involvedUsers.contains(user)}" class="alert alert-light">
+                You are not involved into this project
+            </div>
+            <div th:if="${user != null and project.involvedUsers.contains(user) and project.tasks != null and project.tasks.isEmpty()}" class="alert alert-light">
                 Project doesn`t have tasks
             </div>
             <div class="task-list" th:if="${user != null and project.getInvolvedUsers().contains(user)}">
@@ -158,13 +83,16 @@
         </div>
         <div class="projects-container" th:fragment="addTask" id="addTask">
             <h2>Add task:</h2>
+            <div th:if="${param.missingDataError != null}" class="alert alert-danger" id="dataErrorAlert">
+                You  need to specify all data
+            </div>
             <div th:if="${user == null }" class="alert alert-info">
                 You must login
             </div>
             <div th:if="${user != null and !project.involvedUsers.contains(user)}" class="alert alert-light">
                 You are not involved into this project
             </div>
-            <form th:if="${user != null and project.involvedUsers.contains(user)}" role="form" method="post" th:action="@{/ajax/tasks/create}" th:object="${taskDto}" id="addTaskForm">
+            <form th:if="${user != null and project.involvedUsers.contains(user)}" role="form" method="post" th:object="${taskDto}" id="addTaskForm">
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="name" style="margin-top: 5px;margin-bottom: 2px">Name:</label>
@@ -204,12 +132,13 @@
                 <div class="row">
                     <div th:each="userF : ${project.involvedUsers}" class="card" style="height:100px; width: 700px; margin: 10px">
                         <div class="card-body" th:if="${userF != null}">
-                            <h5 class="card-title" th:text="${userF.username}"></h5>
-                            <a th:href="@{/chat/findOrCreate/{friendId}(friendId=${userF.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">Chat</a>
-                            <form th:if="${user.userFriends != null and !user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/addFriend/{friendId}(friendId = ${userF.id})}">
+                            <h5 class="card-title" th:if="${!user.equals(userF)}" th:text="${userF.username}"></h5>
+                            <h5 class="card-title" th:if="${user.equals(userF)}">You</h5>
+                            <a th:if="${!user.equals(userF)}" th:href="@{/chat/findOrCreate/{friendId}(friendId=${userF.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">Chat</a>
+                            <form th:if="${!user.equals(userF) and user.userFriends != null and !user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/addFriend/{friendId}(friendId = ${userF.id})}">
                                 <button class="btn btn-primary">+</button>
                             </form>
-                            <form th:if="${user.userFriends != null and !#lists.isEmpty(user.userFriends) and user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/removeFriend/{friendId}(friendId = ${userF.id})}">
+                            <form th:if="${!user.equals(userF) and user.userFriends != null and !#lists.isEmpty(user.userFriends) and user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/removeFriend/{friendId}(friendId = ${userF.id})}">
                                 <button class="btn btn-primary">-</button>
                             </form>
                         </div>
@@ -228,10 +157,10 @@
             const taskCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="task_"]');
             taskCheckboxes.forEach(function(checkbox) {
                 const taskId = checkbox.dataset.taskId;
-                const isComplete = checkbox.checked; // Получаем текущее состояние чекбокса
+                const isComplete = checkbox.checked;
 
                 console.log('Task ID:', taskId);
-                console.log('Is Complete:', isComplete); // Выводим текущее состояние чекбокса в консоль
+                console.log('Is Complete:', isComplete);
 
                 checkbox.addEventListener('change', function() {
                     completeTask(taskId, this.checked);
@@ -282,30 +211,42 @@
             $('#addTaskForm').submit(function(event) {
                 event.preventDefault(); // Предотвращаем стандартное поведение формы
 
-                var formData = $(this).serialize(); // Получаем данные формы
-                var projectId = $('input[name="projectId"]').val(); // Получаем идентификатор проекта
+                var name = $('input[name="name"]').val();
+                var description = $('textarea[name="description"]').val();
+                var projectId = $('input[name="projectId"]').val();
+
+                if (name.trim() === '' || description.trim() === '') {
+                    window.location.href = '/projects/' + projectId + '?missingDataError';
+                    return;
+                }
+
+                var taskDto = {
+                    name: name,
+                    description: description
+                };
 
                 $.ajax({
                     type: 'POST',
-                    url: '/ajax/tasks/create?projectId=' + projectId,
-                    data: formData,
+                    url: '/tasks/create?projectId=' + projectId,
+                    contentType: 'application/json',
+                    data: JSON.stringify(taskDto),
                     success: function(response) {
-                        if (response === 'success') {
-                            // Задача успешно создана, обновите страницу или выполните другие действия
-                            window.location.reload();
-                        } else {
-                            // Заменяем форму ответом, содержащим ошибки валидации
-                            $('#addTask').replaceWith(response);
-                        }
+                        console.log("ProjectId: "+ projectId);
+                        window.location.href = '/projects/' + projectId;
                     },
                     error: function(xhr, status, error) {
-                        console.error(error);
+                        if (xhr.status === 401) {
+                            window.location.href = '/home';
+                        } else {
+                            console.error("Error occurred:", error);
+                        }
                     }
-                });
+                });// unautorize
+
+
             });
         });
-
-
+        hideAlert("dataErrorAlert");
 
     </script>
     </div>

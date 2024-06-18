@@ -27,4 +27,6 @@ public interface UserService {
     List<UserEntity> search(String query, String type);
 
     void save(UserEntity currentUser);
+
+    void delete(UserEntity deletedUser);
 }

@@ -4,30 +4,7 @@
 <head>
     <title>News Create</title>
     <style>
-        .btn {
-            display: inline-block;
-            font-weight: 400;
-            color: #212529;
-            text-align: center;
-            vertical-align: middle;
-            cursor: pointer;
-            background-color: #818b9a;
-            border: 1px solid transparent;
-            padding: .375rem .75rem;
-            font-size: 1rem;
-            line-height: 1.5;
-            border-radius: .25rem;
-            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-            margin-top: 20px; /* Добавлен отступ сверху */
-        }
-        .btn:hover {
-            color: #ffffff;
-            background-color: #9a9a9a;
-            border-color: #bbb4b4;
-        }
-        .text-color {
-            color: white;
-        }
+
     </style>
 </head>
 <body class="d-flex flex-column h-100">
@@ -100,7 +77,6 @@
                                 name="password"
                                 th:field="*{password}"
                                 placeholder="password">
-                        <p th:if="${#fields.hasErrors('password')}" class="text-danger" th:errors="*{password}"></p>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Create</button>

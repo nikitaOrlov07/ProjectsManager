@@ -5,77 +5,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
     <style>
-        .container {
-            max-width: 10000px;
-            display: flex;
-            gap: 20px;
-        }
         body {
             background-image: url("/assets/mainPageBackground.jpg");
         }
-        .projects-container {
-            width: 40%;
-            height: 1000px;
-            border: 1px solid #0016a6;
-            padding: 10px;
-        }
-        .projects-list {
-            overflow-y: auto;
-            overflow-x: hidden;
-            height: 850px;
-        }
-        .card {
-            position: relative;
-            padding-bottom: 40px;
-            margin-bottom: 10px;
-            margin-left: 10px;
-            max-width: 750px;
-        }
-        .detail-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            background-color: #8f8f8f;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 20px;
-            width: 100%;
-            height: 90%;
-        }
-
-        .user-info .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 20px;
-            margin-bottom: 10px;
-        }
-
-        .user-info .details {
-            flex-grow: 1;
-        }
-
-        .user-info .details p {
-            margin-bottom: 5px;
-        }
-
-        .user-info .details .username {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .user-info .details .label {
-            font-weight: bold;
-        }
-    </style>
+        </style>
 </head>
 <body layout:fragment="body">
 <div th:if="${param.friendAdded != null}" class="alert alert-info" id="friendAddedAlert">
@@ -168,7 +103,7 @@
                 <p><span class="label">Email:</span> <span th:text="${user.email}"/></p>
                 <p><span class="label">Town:</span> <span th:if="${user.town} != null" th:text="(${user.town.trim()} != '' ? ${user.town} : 'undefined')"></span></p>
                 <p><span class="label">Phone number:</span> <span th:text="(${user.phoneNumber} != null ? ${user.phoneNumber} : 'undefined')"></span></p>
-                <form class="delete-btn" th:action="@{/users/delete/{id}(id=${user.id})}" method="post">
+                <form class="delete-btn delete" th:action="@{/users/delete/{id}(id=${user.id})}" method="post">
                     <input type="submit" value="Delete" class="btn btn-danger">
                 </form>
             </div>
@@ -280,44 +215,44 @@
     $(document).ready(function() {
         // Поиск всех проектов
         $('#searchAllProjectsForm').on('submit', function(e) {
-            e.preventDefault();  // Отмена стандартного поведения формы
+            e.preventDefault();
             searchAllProjects();
         });
 
         $('#searchAllProjectsButton').click(function(e) {
-            e.preventDefault();  // Отмена стандартного поведения кнопки
+            e.preventDefault();
             searchAllProjects();
         });
 
         // Поиск проектов пользователя
         $('#searchUserProjectsForm').on('submit', function(e) {
-            e.preventDefault();  // Отмена стандартного поведения формы
+            e.preventDefault();
             searchUserProjects();
         });
 
         $('#searchUserProjectsButton').click(function(e) {
-            e.preventDefault();  // Отмена стандартного поведения кнопки
+            e.preventDefault();
             searchUserProjects();
         });
 
         $('#searchFriendsUsersForm').on('submit', function(e) {
-            e.preventDefault();  // Отмена стандартного поведения формы
+            e.preventDefault();
             searchFriendsUsers();
         });
 
         $('#searchFriendsUsersButton').click(function(e) {
-            e.preventDefault();  // Отмена стандартного поведения кнопки
+            e.preventDefault();
             searchFriendsUsers();
         });
 
         // Поиск всех пользователей
         $('#searchAllUsersForm').on('submit', function(e) {
-            e.preventDefault();  // Отмена стандартного поведения формы
+            e.preventDefault();
             searchAllUsers();
         });
 
         $('#searchAllUsersButton').click(function(e) {
-            e.preventDefault();  // Отмена стандартного поведения кнопки
+            e.preventDefault();
             searchAllUsers();
         });
 
@@ -402,15 +337,6 @@
                 }
             });
         }
-    }
-
-    function hideAlert(alertId) {
-        setTimeout(function() {
-            let alertElement = document.getElementById(alertId);
-            if (alertElement) {
-                alertElement.style.display = 'none'; <!--display property is set to none -> the element will be hidden from the page -->
-            }
-        }, 1000); // after 5 seconds -> hide alert
     }
 
 </script>

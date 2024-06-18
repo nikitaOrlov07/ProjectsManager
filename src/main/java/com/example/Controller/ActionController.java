@@ -10,11 +10,15 @@ import com.example.Service.ChatService;
 import com.example.Service.MessageService;
 import com.example.Service.ProjectService;
 import com.example.Service.Security.UserService;
+import com.example.mappers.ProjectMapper;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -69,7 +73,22 @@ public class ActionController {
         Chat chat = chatService.findOrCreateChat(currentUser, secondUser);
         return "redirect:/chat/" + chat.getId();
     }
-
+    @GetMapping("/project/{projectId}/chat/{chatId}")
+    public String getChat(@PathVariable("chatId") Long chatId,
+                          Model model,
+                          @PathVariable("projectId") Long projectId)
+    {
+        List<Message> messages = messageService.findAllChatMessage(chatId);
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        Project project = projectService.findById(projectId);
+        if(SecurityUtil.getSessionUser() == null || SecurityUtil.getSessionUser().isEmpty() || (!project.getInvolvedUsers().contains(currentUser)))
+        {
+            return  "redirect:/home";
+        }
+        model.addAttribute("messages", messages);
+        model.addAttribute("user",currentUser);
+        return "chat";
+    }
     @GetMapping("/chat/{chatId}")
     public String getChat(@PathVariable("chatId") Long chatId, Model model)
     {
@@ -155,7 +174,10 @@ public class ActionController {
         return "create-project";
     }
     @PostMapping("/projects/create/save")
-    public String createProject(@ModelAttribute("project") Project project , RedirectAttributes redirectAttributes)
+    public String createProject(@ModelAttribute("projectDto") @Valid ProjectDto projectDto
+                                , BindingResult result
+                                , RedirectAttributes redirectAttributes
+                                , Model model)
     {
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
         if(user == null)
@@ -163,7 +185,32 @@ public class ActionController {
             redirectAttributes.addFlashAttribute("loginError", "You must be logged in");
             return "redirect:/login";
         }
+        if(result.hasErrors())
+        {
+            model.addAttribute("projectDto", projectDto);
+            return "create-project";
+        }
+
+        Project project = ProjectMapper.projectDtotoProject(projectDto);
+        projectService.save(project);
+
+        Chat chat = new Chat();
+        chat.setProject(project);
+        project.setChat(chat);
         projectService.save(project);
         return "redirect:/projects/" + project.getId();
+    }
+    //-------------------------------------------------Users------------------------------------------------
+    @PostMapping("/users/delete/{userId}")
+    public String deleteUser(@PathVariable("userId") Long userId)
+    {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        UserEntity deletedUser = userService.findById(userId);
+        if(currentUser == null ||  !currentUser.equals(deletedUser))
+        {
+            return "redirect:/home";
+        }
+        userService.delete(deletedUser);
+        return "redirect:/logout";
     }
 }

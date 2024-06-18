@@ -1,5 +1,6 @@
 package com.example.Dto;
 
+import com.example.Model.Chat;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,11 +14,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Valid
 public class ProjectDto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,9 +30,10 @@ public class ProjectDto {
     private String description;
     @NotEmpty(message = "You must enter a project category")
     private String category;
-    private String startDate;
+    @Future(message ="This date has already passed")
+    private LocalDate startDate;
     @Future(message="This date has already passed")
-    private String endDate;
-    @Size(min = 3 , message = "The minimum length of the password must be 3 characters")
+    private LocalDate endDate;
     private String password;
+    private Chat chat;
 }
