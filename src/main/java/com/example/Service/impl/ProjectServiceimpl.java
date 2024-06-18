@@ -6,6 +6,7 @@ import com.example.Repository.ProjectRepository;
 import com.example.Repository.Security.UserRepository;
 import com.example.Security.SecurityUtil;
 import com.example.Service.ProjectService;
+import com.example.Service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,13 @@ import java.util.*;
 public class ProjectServiceimpl implements ProjectService {
     private ProjectRepository projectRepository;
     private UserRepository userRepository;
+    private TaskService taskService;
 
     @Autowired
-    public ProjectServiceimpl(ProjectRepository projectRepository, UserRepository userRepository) {
+    public ProjectServiceimpl(ProjectRepository projectRepository, UserRepository userRepository,TaskService taskService) {
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
+        this.taskService = taskService;
     }
 
     public List<Project> findAllProjects() {
@@ -51,5 +54,13 @@ public class ProjectServiceimpl implements ProjectService {
     @Override
     public void save(Project project) {
         projectRepository.save(project);
+    }
+
+    @Override
+    public void delete(Project project) {
+          List<UserEntity> users = project.getInvolvedUsers();
+          users.forEach(user -> {user.getCurrentProjects().remove(project);});
+          taskService.delete(project.getTasks());
+          projectRepository.delete(project);
     }
 }

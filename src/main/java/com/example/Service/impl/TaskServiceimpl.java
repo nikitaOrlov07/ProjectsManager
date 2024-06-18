@@ -4,6 +4,7 @@ import com.example.Model.Project;
 import com.example.Model.Task;
 import com.example.Repository.TaskRepository;
 import com.example.Service.TaskService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,12 @@ public class TaskServiceimpl implements TaskService {
     @Override
     public void save(Task task) {
         taskRepository.save(task);
+    }
+
+    @Transactional
+    @Override
+    public void delete(List<Task> tasks) {
+        taskRepository.deleteAll();
     }
 
 }

@@ -19,6 +19,9 @@
 <div th:if="${param.friendRemoved != null}" class="alert alert-info" id="friendRemovedAlert">
     Friend was removed
 </div>
+<div th:if="${param.projectSuccessfulDelete != null}" class="alert alert-success" id="projectDeletedAlert">
+    Project was successfully deleted
+</div>
 <div class="container" style="margin-top: 10px">
     <div class="projects-container" th:if="${allProjects != null}">
         <h2>All available projects:</h2>
@@ -258,6 +261,7 @@
 
         hideAlert('friendAddedAlert');
         hideAlert('friendRemovedAlert');
+        hideAlert('projectDeletedAlert');
     });
 
     function searchAllProjects() {

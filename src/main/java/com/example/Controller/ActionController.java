@@ -159,6 +159,7 @@ public class ActionController {
         userService.save(user); projectService.save(project);
         return "redirect:/projects/" +projectId;
     }
+    // Create project
     @GetMapping("/projects/create")
     public String createProject(RedirectAttributes redirectAttributes,
                                 Model model)
@@ -197,8 +198,22 @@ public class ActionController {
         Chat chat = new Chat();
         chat.setProject(project);
         project.setChat(chat);
+        project.getInvolvedUsers().add(user);
         projectService.save(project);
         return "redirect:/projects/" + project.getId();
+    }
+    // delete project
+    @PostMapping("/projects/{projectId}/delete")
+    public String deleteProject(@PathVariable("projectId") Long projectId)
+    {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        Project project = projectService.findById(projectId);
+        if(currentUser == null || (currentUser !=null && !project.getInvolvedUsers().contains(currentUser)))
+        {
+         return "redirect:/home";
+        }
+        projectService.delete(project);
+        return "redirect:/home?projectSuccessfulDelete";
     }
     //-------------------------------------------------Users------------------------------------------------
     @PostMapping("/users/delete/{userId}")

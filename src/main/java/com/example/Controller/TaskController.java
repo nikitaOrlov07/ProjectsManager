@@ -64,5 +64,16 @@ public class TaskController {
         logger.info("Task created");
         return ResponseEntity.ok("success");
     }
+    @PostMapping("projects/{projectId}/tasks/reset")
+    public String resetTasks(@PathVariable("projectId") Long projectId)
+    {
+        Project project = projectService.findById(projectId);
+        List<Task> tasks = project.getTasks();
+        taskService.delete(tasks);
+        project.getTasks().clear(); // clear tasks list from project
+        projectService.save(project);
+        return "redirect:/projects/"+projectId;
+    }
+
 
 }

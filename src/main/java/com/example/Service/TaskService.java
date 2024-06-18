@@ -6,10 +6,10 @@ import com.example.Model.Task;
 
 import java.util.List;
 
-public interface TaskService{
-
-
+public interface TaskService {
     Task findById(Long taskId);
 
     void save(Task task);
+
+    void delete(List<Task> tasks);
 }

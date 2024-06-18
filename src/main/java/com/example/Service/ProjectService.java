@@ -17,4 +17,5 @@ public interface ProjectService {
     Project findById(Long projectId);
     void save (Project project);
 
+    void delete(Project project);
 }
