@@ -24,6 +24,7 @@ public class ProjectMapper {
                 .endDate(endDateString)
                 .password(projectDto.getPassword())
                 .chat(projectDto.getChat())
+                .involvedUsers(projectDto.getInvolvedUsers())
                 .build();
         return  project;
     }

@@ -1,10 +1,12 @@
 package com.example.Controller;
 
 import com.example.Dto.TaskDto;
+import com.example.Model.Attachment;
 import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
 import com.example.Model.Task;
 import com.example.Security.SecurityUtil;
+import com.example.Service.AttachmentService;
 import com.example.Service.ProjectService;
 import com.example.Service.Security.UserService;
 import com.example.Service.TaskService;
@@ -26,13 +28,16 @@ import java.util.Map;
 @Controller
 public class MainController {
     private ProjectService projectService; private UserService userService; private TaskService taskService;
+    private AttachmentService attachmentService;
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     @Autowired
-    public MainController(ProjectService projectService, UserService userService,TaskService taskService) {
+    public MainController(ProjectService projectService, UserService userService,TaskService taskService,AttachmentService attachmentService) {
         this.projectService = projectService;
         this.userService = userService;
         this.taskService = taskService;
+        this.attachmentService = attachmentService;
+
     }
 
 
@@ -77,10 +82,13 @@ public class MainController {
     {
         Project project = projectService.findById(projectId);
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
+        List<Attachment> attachments = attachmentService.findAllByProject(project);
+        attachments.forEach(attachment -> logger.info("File name: " + attachment.getFileName()));
         model.addAttribute("user", user);
         model.addAttribute("project", project);
         model.addAttribute("tasks", project.getTasks());
         model.addAttribute("taskDto",new TaskDto());
+        model.addAttribute("files", attachments);
         return "detail-page";
     }
     //------------------------------------------------------------ Search projects-----------------------------------------------------------------

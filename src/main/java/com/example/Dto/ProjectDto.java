@@ -1,6 +1,7 @@
 package com.example.Dto;
 
 import com.example.Model.Chat;
+import com.example.Model.Security.UserEntity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,6 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -36,4 +38,5 @@ public class ProjectDto {
     private LocalDate endDate;
     private String password;
     private Chat chat;
+    private List<UserEntity> involvedUsers;
 }

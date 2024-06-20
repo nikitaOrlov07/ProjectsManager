@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/register/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/error")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/upload/{projectId}")).permitAll()
                         // nobody can delete ADMIN user (even ADMIN himself)
                         .requestMatchers(new AntPathRequestMatcher("/users/delete/1")).denyAll()
                         .anyRequest().authenticated()) //other URLs are only allowed authenticated users.

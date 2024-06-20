@@ -14,7 +14,11 @@ public interface ProjectRepository  extends JpaRepository<Project,Long> {
     // For Searching
     @Query("Select c from Project c WHERE c.name LIKE CONCAT('%', :query ,'%')")
     List<Project> searchAllProjects(String query);
+
     @Query("SELECT p FROM UserEntity u JOIN u.currentProjects p WHERE p.name LIKE CONCAT('%', :query, '%')")
     List<Project> searchUserProjects(@Param("query") String query);
+
+
+
 
 }

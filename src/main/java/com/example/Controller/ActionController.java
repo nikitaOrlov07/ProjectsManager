@@ -27,7 +27,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.*;
 
 @Controller
 public class ActionController {
@@ -138,6 +138,7 @@ public class ActionController {
         return "redirect:/chat/" + chatId;
     }
     //----------------------------------------------------------------Projects----------------------------------------------------------------
+
     @PostMapping("/projects/addProject/{projectId}")
     public String addProject(@PathVariable("projectId") Long projectId)
     {
@@ -196,9 +197,9 @@ public class ActionController {
         projectService.save(project);
 
         Chat chat = new Chat();
-        chat.setProject(project);
         project.setChat(chat);
-        project.getInvolvedUsers().add(user);
+        List<UserEntity> involvedUsers = new ArrayList<>(Collections.singletonList(user));
+        project.setInvolvedUsers(involvedUsers);
         projectService.save(project);
         return "redirect:/projects/" + project.getId();
     }
