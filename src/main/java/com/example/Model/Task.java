@@ -1,10 +1,7 @@
 package com.example.Model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
@@ -19,6 +16,7 @@ public class Task {
     private String name;
     private String description;
     private boolean complete;
+    @ToString.Exclude
     @ManyToOne
     private Project project;
 

@@ -62,3 +62,128 @@ function hideAlert(alertId) {
         }
     }, 5000); // after 5 seconds -> hide alert
 }
+function updateProgress() {
+    const tasks = document.querySelectorAll('.task-list input[type="checkbox"]');
+    let completedTasks = 0;
+    tasks.forEach(task => {
+        if (task.checked) {
+            completedTasks++;
+        }
+    });
+    const progress = (completedTasks / tasks.length) * 100;
+    const progressBar = document.getElementById('progress-bar');
+    progressBar.style.width = progress + '%';
+    progressBar.setAttribute('aria-valuenow', progress);
+}
+
+function completeTask(taskId, isComplete) {
+    const url = '/taskComplete/' + taskId;
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: { complete: isComplete },
+        success: function(data, textStatus, jqXHR) {
+            console.log('Task status updated successfully');
+            updateProgress();
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error('Error updating task status:', errorThrown);
+        }
+    });
+}
+function updateCharCount() {
+    const textarea = document.getElementById('description');
+    const charCount = textarea.value.length;
+    document.getElementById('charCount').textContent = charCount;
+}
+function checkPassword(event, form, projectPassword) {
+    if (projectPassword) {
+        event.preventDefault();
+        var enteredPassword = prompt("Please enter the project password:");
+        if (enteredPassword === projectPassword) {
+            form.submit();
+        } else {
+            alert("Incorrect password. Access denied.");
+            return false;
+        }
+    }
+    return true;
+}
+function searchAllProjects() {
+    let query = $('#queryAllProjects').val().trim();
+    if (query === '') {
+        window.location.href = '/home';
+    } else {
+        $.ajax({
+            url: '/home/find',
+            type: 'GET',
+            data: { query: query , type: "allProjects"},
+            success: function(data) {
+                console.log('Success function called');
+                $('#allProjects').html(data);
+            },
+            error: function() {
+                alert('Error occurred during search');
+            }
+        });
+    }
+}
+
+function searchUserProjects() {
+    let query = $('#queryUserProjects').val().trim();
+    if (query === '') {
+        window.location.href = '/home';
+    } else {
+        $.ajax({
+            url: '/home/find',
+            type: 'GET',
+            data: { query: query , type:"userProjects"},
+            success: function(data) {
+                console.log('Success function called');
+                $('#userProjects').html(data);
+            },
+            error: function() {
+                alert('Error occurred during search');
+            }
+        });
+    }
+}
+
+function searchFriendsUsers() {
+    let query = $('#queryFriendsUsers').val().trim();
+    if (query === '') {
+        window.location.href = '/home';
+    } else {
+        $.ajax({
+            url: '/home/find',
+            type: 'GET',
+            data: {query: query, type: "userFriends"},
+            success: function (data) {
+                console.log('Success function called');
+                $('#usersFriends').html(data);
+            },
+            error: function () {
+                alert('Error occurred during search');
+            }
+        });
+    }
+}
+function searchAllUsers() {
+    let query = $('#queryAllUsers').val().trim();
+    if (query === '') {
+        window.location.href = '/home';
+    } else {
+        $.ajax({
+            url: '/home/find',
+            type: 'GET',
+            data: { query: query , type: "allUsers"},
+            success: function(data) {
+                console.log('Success function called');
+                $('#userList').html(data);
+            },
+            error: function() {
+                alert('Error occurred during search');
+            }
+        });
+    }
+}

@@ -198,8 +198,9 @@ public class ActionController {
 
         Chat chat = new Chat();
         project.setChat(chat);
-        List<UserEntity> involvedUsers = new ArrayList<>(Collections.singletonList(user));
+        List<UserEntity> involvedUsers = new ArrayList<>(Arrays.asList(user));
         project.setInvolvedUsers(involvedUsers);
+        user.getCurrentProjects().add(project);
         projectService.save(project);
         return "redirect:/projects/" + project.getId();
     }

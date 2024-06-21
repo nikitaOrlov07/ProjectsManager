@@ -23,6 +23,9 @@
             <span id="attemptsRemaining"></span>
         </div>
 
+        <div th:if="${param.fileDeleteSuccessfully != null}" class="alert alert-info" id="fileDeleteSuccessfully">
+            File was successfully deleted
+        </div>
 
         <div class="col-md-8" style="margin-left: 20px; position: relative;">
             <div class="card-body">
@@ -31,23 +34,30 @@
                         <span th:text="${project.name}" style="font-family: 'Georgia', serif; color: #2c2c2c;"></span>
                     </h2>
                     <span class="card-text" style="font-family: 'Georgia'; font-size: 25px;">
-                <br>
-                <span style="color: #020202;">Description:</span>
-                <span th:text="${project.description}" style="color: #797878;"></span>
-                <br>
-                <span style="color: #020202;">Start date:</span>
-                <span th:text="${project.startDate}" style="color: #797878;"></span>
-                <span th:if="${project.startDate == null or project.startDate.isEmpty()}">no specify</span>
-                <br>
-                <span style="color: #020202;">End date:</span>
-                <span th:text="${project.endDate}" style="color: #797878;"></span>
-                <span th:if="${project.endDate == null or project.endDate.isEmpty()}">no specify</span>
-            </span>
+            <br>
+            <span style="color: #020202;">Description:</span>
+                        </br>
+            <span th:text="${project.description}" style="color: #797878; max-width: 1000px; display: inline-block; word-wrap: break-word; overflow-wrap: break-word;"></span>
+            <br>
+            <span style="color: #020202;">Start date:</span>
+            <span th:text="${project.startDate}" style="color: #797878;"></span>
+            <span th:if="${project.startDate == null or project.startDate.isEmpty()}">no specify</span>
+            <br>
+            <span style="color: #020202;">End date:</span>
+            <span th:text="${project.endDate}" style="color: #797878;"></span>
+            <span th:if="${project.endDate == null or project.endDate.isEmpty()}">no specify</span>
+             <br>
+             <span>Involved: </span>
+            <span th:text="${project.involvedUsers.size()}" style="color: #797878;"></span>
+
+        </span>
                 </strong>
                 <div style="margin-top: 20px;">
                     <div style="display: inline-block;">
-                        <form  th:if="${user != null and user.currentProjects != null and !user.currentProjects.contains(project) and project.involvedUsers != null and !project.involvedUsers.contains(user)}"
-                              method="post" th:action="@{/projects/addProject/{projectId}(projectId=${project.id})}" style="display: inline-block;">
+                        <form th:if="${user != null and user.currentProjects != null and !user.currentProjects.contains(project) and project.involvedUsers != null and !project.involvedUsers.contains(user)}"
+                              method="post" th:action="@{/projects/addProject/{projectId}(projectId=${project.id})}"
+                              style="display: inline-block;"
+                              th:attr="onsubmit='return checkPassword(event, this, \'' + ${project.password} + '\');'">
                             <button type="submit" class="btn btn-primary">Add</button>
                         </form>
                         <form th:if="${user != null and user.currentProjects != null and user.currentProjects.contains(project) and project.involvedUsers != null and project.involvedUsers.contains(user)}"
@@ -69,10 +79,13 @@
     <div class="container">
         <div class="projects-container">
             <!-- Task List -->
-            <h2 >Task:</h2>
-            <form method="post" th:action="@{{projectId}/tasks/reset(projectId=${projectId})}" style="margin-bottom: 5px">
-                <button type="submit" class="btn btn-primary" style="margin-top: 10px">🔄</button>
-            </form>
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <h2 style="margin: 0;">Task:</h2>
+                <form method="post" th:if="${user != null and project.involvedUsers.contains(user) and tasks != null and !tasks.isEmpty()}" th:action="@{{projectId}/tasks/reset(projectId=${projectId})}" style="margin-left: 10px;">
+                    <button type="submit" class="btn btn-primary">🔄</button>
+                </form>
+            </div>
+
             <div th:if="${user == null}" class="alert alert-info">
                 You must login
             </div>
@@ -129,55 +142,125 @@
     </div>
 
     <hr style="border: 2px solid #ccc; border-color: #032738; margin-top: 50px">
-    <div style="margin-left: 20px" id="userListContainer">
-        <h2 >Participants:</h2>
-        <div th:if="${user == null}" class="alert alert-info">
-            You must login
-        </div>
-        <div id="userList" th:fragment="userList" th:if="${user != null}" class="users-list">
-            <div th:if="${project.involvedUsers == null}" class="alert alert-warning">
-                There are no involved users
+
+        <div class="container"  th:fragment="files" style="margin-bottom: 10px">
+        <div class="projects-container" style="position: relative">
+            <h2 class="mb-4">Files:</h2>
+            <div th:if="${user == null }" class="alert alert-info">
+                You must login
             </div>
-            <div th:if="${project.involvedUsers != null}">
-                <div th:if="${project.involvedUsers.isEmpty()}" class="alert alert-light">
+            <div th:if="${user != null and !project.involvedUsers.contains(user)}" class="alert alert-light">
+                You are not involved into this project
+            </div>
+            <div class="projects-list" th:if="${user != null and project.involvedUsers.contains(user)}">
+                <div th:if="${files != null and files.isEmpty()}" class="alert alert-light">
+                    No files have been added to this project yet.
+                </div>
+                <div class="row" style="margin-right: 5px">
+                    <div th:if="${files != null and !files.isEmpty()}" th:each="file : ${files}" class="col-md-6 mb-3">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body" th:if="${file != null}">
+                                <h5 class="card-title" th:text="${file.fileName}"></h5>
+                                <p class="card-text">Creator: <span th:text="${file.creator}"></span></p>
+                                <p class="card-text">Time: <small class="text-muted" th:text="${file.timestamp}"></small></p>
+                                <a th:href="@{/view/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">View</a>
+                                <a th:href="@{/download/{fileId}(fileId=${file.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 110px; bottom: 5px; width:100px; height: 35px">Download</a>
+                                <form method="post" th:action="@{/projects/{projectId}/delete/{fileId}(projectId=${projectId},fileId=${file.id})}"  >
+                                    <input type="submit" value="Delete" class="btn btn-danger" style="position: absolute; right: 215px; bottom: 5px; width:100px; height: 35px">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           </div>
+            <div class="projects-container">
+                <h2 class="mb-4">Upload new File:</h2>
+                <div th:if="${user == null }" class="alert alert-info">
+                    You must login
+                </div>
+                <div th:if="${user != null and !project.involvedUsers.contains(user)}" class="alert alert-light">
+                    You are not involved into this project
+                </div>
+                <div class="card mt-4 shadow-sm" th:if="${user != null and project.involvedUsers.contains(user)}">
+                    <div class="card-body">
+                        <form  id="uploadForm" th:action="@{/upload/{projectId}(projectId=${project.id})}" method="post" enctype="multipart/form-data" class="mt-3">
+                            <div class="mb-3">
+                                <label for="file" class="form-label">Choose a file:</label>
+                                <input class="form-control" type="file" id="file" name="file">
+                                <div id="fileError" class="text-danger" style="display: none;">Please select a file.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-2"></i>Upload
+                            </button>
+                        </form>
+
+                        <script>
+                            document.getElementById('uploadForm').addEventListener('submit', function(event) {
+                                event.preventDefault();
+                                var fileInput = document.getElementById('file');
+                                var fileError = document.getElementById('fileError');
+
+                                if (fileInput.files.length === 0) {
+                                    fileError.style.display = 'block';
+                                    return;
+                                }
+
+                                fileError.style.display = 'none';
+
+                                var formData = new FormData(this);
+
+                                fetch(this.action, {
+                                    method: 'POST',
+                                    body: formData
+                                })
+                                    .then(response => {
+                                        if (response.redirected) {
+                                            window.location.href = response.url;
+                                        } else {
+                                            // Handle non-redirect responses if necessary
+                                            console.log('Upload successful, but no redirect');
+                                        }
+                                    })
+                                    .catch(error => console.error('Error:', error));
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr style="border: 2px solid #ccc; border-color: #032738; margin-top: 50px">
+
+        <div style="margin-left: 20px" id="userListContainer">
+            <h2 >Participants:</h2>
+            <div th:if="${user == null}" class="alert alert-info" style="width:1050px">
+                You must login
+            </div>
+            <div id="userList" th:fragment="userList" th:if="${user != null}" class="users-list">
+                <div th:if="${project.involvedUsers == null}" class="alert alert-warning">
                     There are no involved users
                 </div>
-                <div class="row">
-                    <div th:each="userF : ${project.involvedUsers}" class="card" style="height:100px; width: 700px; margin: 10px">
-                        <div class="card-body" th:if="${userF != null}">
-                            <h5 class="card-title" th:if="${!user.equals(userF)}" th:text="${userF.username}"></h5>
-                            <h5 class="card-title" th:if="${user.equals(userF)}">You</h5>
-                            <a th:if="${!user.equals(userF)}" th:href="@{/chat/findOrCreate/{friendId}(friendId=${userF.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">Chat</a>
-                            <form th:if="${!user.equals(userF) and user.userFriends != null and !user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/addFriend/{friendId}(friendId = ${userF.id})}">
-                                <button class="btn btn-primary">+</button>
-                            </form>
-                            <form th:if="${!user.equals(userF) and user.userFriends != null and !#lists.isEmpty(user.userFriends) and user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/removeFriend/{friendId}(friendId = ${userF.id})}">
-                                <button class="btn btn-primary">-</button>
-                            </form>
+                <div th:if="${project.involvedUsers != null}">
+                    <div th:if="${project.involvedUsers.isEmpty()}" class="alert alert-light">
+                        There are no involved users
+                    </div>
+                    <div class="row">
+                        <div th:each="userF : ${project.involvedUsers}" class="card" style="height:100px; width: 700px; margin: 10px">
+                            <div class="card-body" th:if="${userF != null}">
+                                <h5 class="card-title" th:if="${!user.equals(userF)}" th:text="${userF.username}"></h5>
+                                <h5 class="card-title" th:if="${user.equals(userF)}">You</h5>
+                                <a th:if="${!user.equals(userF)}" th:href="@{/chat/findOrCreate/{friendId}(friendId=${userF.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">Chat</a>
+                                <form th:if="${!user.equals(userF) and user.userFriends != null and !user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/addFriend/{friendId}(friendId = ${userF.id})}">
+                                    <button class="btn btn-primary">+</button>
+                                </form>
+                                <form th:if="${!user.equals(userF) and user.userFriends != null and !#lists.isEmpty(user.userFriends) and user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/removeFriend/{friendId}(friendId = ${userF.id})}">
+                                    <button class="btn btn-primary">-</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-        <div class="projects-container">
-            <h2 >Files:</h2>
-            <div class="projects-list">
-                <div class="row">
-                    <div th:if="${files != null and !files.isEmpty()}" th:each="file : ${files}" class="card" style="height:100px; width: 700px; margin: 10px">
-                        <div class="card-body" th:if="${file != null}">
-                            <h5 class="card-title" th:text="${file.fileName}"></h5>
-                            <p>Creator: <span th:text="${file.creator}"></span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <form th:action="@{/upload/{projectId}(projectId=${project.id})}" method="post" enctype="multipart/form-data">
-                <label for="file">Выберите файл:</label>
-                <input type="file" id="file" name="file"><br><br>
-                <input type="submit" value="Отправить">
-            </form>
         </div>
     <!-- JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -199,42 +282,6 @@
                 });
             });
         });
-
-        function updateProgress() {
-            const tasks = document.querySelectorAll('.task-list input[type="checkbox"]');
-            let completedTasks = 0;
-            tasks.forEach(task => {
-                if (task.checked) {
-                    completedTasks++;
-                }
-            });
-            const progress = (completedTasks / tasks.length) * 100;
-            const progressBar = document.getElementById('progress-bar');
-            progressBar.style.width = progress + '%';
-            progressBar.setAttribute('aria-valuenow', progress);
-        }
-
-        function completeTask(taskId, isComplete) {
-            const url = '/taskComplete/' + taskId;
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: { complete: isComplete },
-                success: function(data, textStatus, jqXHR) {
-                    console.log('Task status updated successfully');
-                    updateProgress();
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    console.error('Error updating task status:', errorThrown);
-                }
-            });
-        }
-        function updateCharCount() {
-            const textarea = document.getElementById('description');
-            const charCount = textarea.value.length;
-            document.getElementById('charCount').textContent = charCount;
-        }
-
         // Initialize the character count on page load
         document.addEventListener('DOMContentLoaded', (event) => {
             updateCharCount();
@@ -280,7 +327,10 @@
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
         });
+        hideAlert('fileDeleteSuccessfully');
     </script>
+    </div>
+        </div>
     </div>
 </section>
 </body>

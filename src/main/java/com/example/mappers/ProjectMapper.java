@@ -11,7 +11,7 @@ public class ProjectMapper {
        String startDateString = null;String endDateString=null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         if(projectDto != null && projectDto.getStartDate() != null)
-            projectDto.getStartDate().format(formatter);
+            startDateString = projectDto.getStartDate().format(formatter);
         if(projectDto != null && projectDto.getEndDate() != null)
             endDateString = projectDto.getEndDate().format(formatter);
 

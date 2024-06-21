@@ -13,6 +13,9 @@
         </style>
 </head>
 <body layout:fragment="body">
+<div th:if="${param.operationError != null}" class="alert alert-danger" id="operationError">
+    You are not allowed to make this request
+</div>
 <div th:if="${param.friendAdded != null}" class="alert alert-info" id="friendAddedAlert">
     Friend was added
 </div>
@@ -33,9 +36,9 @@
             <div th:if="${allProjects.isEmpty()}" class="alert alert-light" style="margin-left: 5px">
                 There are no projects
             </div>
-            <div class="row ">
+            <div class="row">
                 <div th:each="project : ${allProjects}" class="card">
-                    <div class="card-body">
+                    <div class="card-body" style="margin-right: 5px">
                         <h5 class="card-title" th:text="${project.name}"></h5>
                         <p class="card-text">
                             <strong>Category:</strong>
@@ -262,87 +265,8 @@
         hideAlert('friendAddedAlert');
         hideAlert('friendRemovedAlert');
         hideAlert('projectDeletedAlert');
+        hideAlert('operationError');
     });
-
-    function searchAllProjects() {
-        let query = $('#queryAllProjects').val().trim();
-        if (query === '') {
-            window.location.href = '/home';
-        } else {
-            $.ajax({
-                url: '/home/find',
-                type: 'GET',
-                data: { query: query , type: "allProjects"},
-                success: function(data) {
-                    console.log('Success function called');
-                    $('#allProjects').html(data);
-                },
-                error: function() {
-                    alert('Error occurred during search');
-                }
-            });
-        }
-    }
-
-    function searchUserProjects() {
-        let query = $('#queryUserProjects').val().trim();
-        if (query === '') {
-            window.location.href = '/home';
-        } else {
-            $.ajax({
-                url: '/home/find',
-                type: 'GET',
-                data: { query: query , type:"userProjects"},
-                success: function(data) {
-                    console.log('Success function called');
-                    $('#userProjects').html(data);
-                },
-                error: function() {
-                    alert('Error occurred during search');
-                }
-            });
-        }
-    }
-
-    function searchFriendsUsers() {
-        let query = $('#queryFriendsUsers').val().trim();
-        if (query === '') {
-            window.location.href = '/home';
-        } else {
-            $.ajax({
-                url: '/home/find',
-                type: 'GET',
-                data: {query: query, type: "userFriends"},
-                success: function (data) {
-                    console.log('Success function called');
-                    $('#usersFriends').html(data);
-                },
-                error: function () {
-                    alert('Error occurred during search');
-                }
-            });
-        }
-    }
-    function searchAllUsers() {
-        let query = $('#queryAllUsers').val().trim();
-        if (query === '') {
-            window.location.href = '/home';
-        } else {
-            $.ajax({
-                url: '/home/find',
-                type: 'GET',
-                data: { query: query , type: "allUsers"},
-                success: function(data) {
-                    console.log('Success function called');
-                    $('#userList').html(data);
-                },
-                error: function() {
-                    alert('Error occurred during search');
-                }
-            });
-        }
-    }
-
 </script>
 </body>
 </html>
