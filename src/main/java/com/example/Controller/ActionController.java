@@ -16,13 +16,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
@@ -203,6 +201,31 @@ public class ActionController {
         user.getCurrentProjects().add(project);
         projectService.save(project);
         return "redirect:/projects/" + project.getId();
+    }
+    // update project
+    @GetMapping("/projects/{projectId}/update")
+    public String updateNews(Model model, @PathVariable("projectId") Long projectId) {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        Project project = projectService.findById(projectId);
+        if (currentUser == null || !project.getInvolvedUsers().contains(currentUser))
+        {
+            return "redirect:/home?operationError";
+        }
+        ProjectDto projectDto = ProjectMapper.projectToProjectDto(project);
+        model.addAttribute("projectDto", projectDto);
+        return "project-update";
+    }
+
+
+    @PostMapping(value = "/news/update/save", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public String updateNews(@Valid @RequestBody ProjectDto projectDto) {
+        String username = SecurityUtil.getSessionUser();
+        if (username == null || !userService.findByUsername(username).hasAdminRole()) // if the user is not authorized and don`t have admin role
+        {
+            return "redirect:/news";
+        }
+        projectService.save(ProjectMapper.projectDtotoProject(projectDto));
+        return "redirect:/projects/"+projectDto.getId();
     }
     // delete project
     @PostMapping("/projects/{projectId}/delete")

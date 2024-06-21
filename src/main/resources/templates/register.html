@@ -53,7 +53,7 @@
                     <div th:if="${param.fail}" class="alert alert-danger">
                         Username or email already exists
                     </div>
-                    <div class="login-form">
+                    <div class="login-form" style="width: 15000px">
                         <form method="post" th:action="@{/register/save}" th:object="${user}">
                             <div class="form-group" >
                                 <label>Username</label>

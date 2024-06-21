@@ -1,0 +1,110 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>News Create</title>
+    <style>
+        .text-color
+        {
+            color: white;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column h-100">
+<main class="flex-shrink-0">
+    <section layout:fragment="body" class="py-5">
+        <div class="container">
+            <form role="form" method="post" th:action="@{/projects/create/save}" th:object="${projectDto}">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="name" class="text-color">Name:</label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="name"
+                                name="name"
+                                th:field="*{name}"
+                                placeholder="Title">
+                        <p th:if="${#fields.hasErrors('name')}" class="text-danger" th:errors="*{name}"></p>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="description" class="text-color">Description:</label>
+                        <textarea
+                                class="form-control"
+                                id="description"
+                                name="description"
+                                th:field="*{description}"
+                                style="width: 1000px; height: 250px"
+                                maxlength="500"
+                                oninput="updateCharCount()"></textarea>
+                        <div id="charCount">0 / 300</div>
+                        <p th:if="${#fields.hasErrors('description')}" class="text-danger" th:errors="*{description}"></p>
+                    </div>
+
+                    <script>
+                        function updateCharCount() {
+                            let description = document.getElementById('description');
+                            let charCount = document.getElementById('charCount');
+                            let remainingChars = 500 - description.value.length;
+                            charCount.innerHTML = description.value.length + ' / 500';
+
+                            if (remainingChars <= 0) {
+                                charCount.style.color = 'red';
+                            } else {
+                                charCount.style.color = 'white';
+                            }
+                        }
+                        window.onload = updateCharCount; // call , when page is loaded
+                    </script>
+                    <div class="form-group mb-3">
+                        <label for="category" class="text-color">Category:</label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                id="category"
+                                name="category"
+                                th:field="*{category}"
+                                placeholder="category">
+                        <p th:if="${#fields.hasErrors('category')}" class="text-danger" th:errors="*{category}"></p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="startDate" class="text-color">Start Date:</label>
+                        <input
+                                type="date"
+                                class="form-control"
+                                id="startDate"
+                                name="startDate"
+                                th:field="*{startDate}"
+                                placeholder="start date">
+                        <p th:if="${#fields.hasErrors('startDate')}" class="text-danger" th:errors="*{startDate}"></p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="endDate" class="text-color">End Date:</label>
+                        <input
+                                type="date"
+                                class="form-control"
+                                id="endDate"
+                                name="endDate"
+                                th:field="*{endDate}"
+                                placeholder="end date">
+                        <p th:if="${#fields.hasErrors('endDate')}" class="text-danger" th:errors="*{endDate}"></p>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="password" class="text-color">Password:</label>
+                        <input
+                                type="password"
+                                class="form-control"
+                                id="password"
+                                name="password"
+                                th:field="*{password}"
+                                placeholder="password">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 10px">Create</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>
