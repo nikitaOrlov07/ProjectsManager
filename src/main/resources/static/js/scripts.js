@@ -187,3 +187,22 @@ function searchAllUsers() {
         });
     }
 }
+function searchInvitations() {
+    let query = $('#queryInvitations').val().trim();
+    if (query === '') {
+        window.location.href = '/home';
+    } else {
+        $.ajax({
+            url: '/home/find',
+            type: 'GET',
+            data: { query: query , type: "invitations"},
+            success: function(data) {
+                console.log('Success function called');
+                $('#userFriendsInvList').html(data);
+            },
+            error: function() {
+                alert('Error occurred during search');
+            }
+        });
+    }
+}

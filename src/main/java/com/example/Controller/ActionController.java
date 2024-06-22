@@ -39,23 +39,6 @@ public class ActionController {
         this.messageService=messageService;
         this.chatService=chatService;
     }
-    @PostMapping("/users/addFriend/{friendId}")
-    public String addFriend(@PathVariable("friendId") Long friendId)
-    {
-        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
-        UserEntity friendUser = userService.findById(friendId);
-        userService.friendsLogic(currentUser,friendUser,"add");
-        return "redirect:/home?friendAdded";
-    }
-    @PostMapping("/users/removeFriend/{friendId}")
-    public String removeFriend(@PathVariable("friendId") Long friendId)
-    {
-        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
-        UserEntity friendUser = userService.findById(friendId);
-        userService.friendsLogic(currentUser,friendUser,"remove");
-        return "redirect:/home?friendRemoved";
-    }
-
     //----------------------------------------------- Chat ------------------------------------------------------------------
     // find existing chat or create new beetween two people
     @GetMapping("/chat/findOrCreate/{secondId}")
@@ -253,4 +236,54 @@ public class ActionController {
         userService.delete(deletedUser);
         return "redirect:/logout";
     }
+    @PostMapping("/users/{action}Friend/{friendId}")
+    public String handleFriendAction(@PathVariable("action") String action,
+                                     @PathVariable("friendId") Long friendId) {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        UserEntity friendUser = userService.findById(friendId);
+
+        if (currentUser == null || friendUser == null) {
+            return "redirect:/home?operationError";
+        }
+
+        switch (action.toLowerCase()) {
+            case "add":
+                userService.friendsLogic(currentUser, friendUser, "add");
+                return "redirect:/home?friendAdded";
+            case "remove":
+                userService.friendsLogic(currentUser, friendUser, "remove");
+                return "redirect:/home?friendRemoved";
+            default:
+                return "redirect:/home?operationError";
+        }
+    }
+    @PostMapping("/users/{action}FriendInvitation/{friendId}")
+    public String handleFriendInvitation(@PathVariable("action") String action,
+                                         @PathVariable("friendId") Long friendId) {
+        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
+        UserEntity friendUser = userService.findById(friendId);
+
+        if (currentUser == null || friendUser == null) {
+            return "redirect:/home?operationError";
+        }
+
+        switch (action) {
+            case "remove":
+                friendUser.getUserFriendsInvitations().remove(currentUser);
+                break;
+            case "decline":
+                currentUser.getUserFriendsInvitations().remove(friendUser);
+                break;
+            case "add":
+                friendUser.getUserFriendsInvitations().add(currentUser);
+                break;
+            default:
+                return "redirect:/home?operationError";
+        }
+
+        userService.save(currentUser); userService.save(friendUser);
+        return "redirect:/home?friendInvitation"+action+"Success";
+    }
+
+
 }

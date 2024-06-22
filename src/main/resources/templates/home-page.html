@@ -25,6 +25,16 @@
 <div th:if="${param.projectSuccessfulDelete != null}" class="alert alert-success" id="projectDeletedAlert">
     Project was successfully deleted
 </div>
+
+<div th:if="${param.friendInvitationaddSuccess != null}" class="alert alert-success" id="friendInvitationAdd">
+    Friend invite was successfully added
+</div>
+<div th:if="${param.friendInvitationremoveSuccess != null}" class="alert alert-success" id="friendInvitationRemove">
+    Friend invite was successfully removed
+</div>
+<div th:if="${param.friendInvitationdeclineSuccess != null}" class="alert alert-success" id="friendInvitationDecline">
+    Friend invite was successfully declined
+</div>
 <div class="container" style="margin-top: 10px">
     <div class="projects-container" th:if="${allProjects != null}">
         <h2>All available projects:</h2>
@@ -47,9 +57,11 @@
                             <br/><strong>Involved: </strong>
                             <span th:text="${project.involvedUsers.size()}"/>
                             <span style="position: absolute; right: 5px; top: 5px">
-                                <strong>Start Date:</strong> <span th:text="${project.startDate}"></span><br/>
-                                <strong>End date:</strong> <span th:text="${project.endDate}"></span><br/>
-                            </span>
+                               <strong>Start Date:</strong>
+                                    <span th:text="${project.startDate != null ? project.startDate : 'Not specified'}"></span><br/>
+                                    <strong>End date:</strong>
+                                    <span th:text="${project.endDate != null ? project.endDate : 'Not specified'}"></span><br/>
+                                </span>
                         </p>
                     </div>
                     <a class="btn btn-primary detail-btn" th:href="@{/projects/{projectId}(projectId=${project.id})}">Detail</a>
@@ -82,10 +94,12 @@
                                 <br/><strong>Involved:</strong>
                                 <span th:text="${project.involvedUsers.size()}"/>
                                 <span style="position: absolute; right: 5px; top: 5px">
-                                    <strong>Start Date:</strong> <span th:text="${project.startDate}"></span><br/>
-                                    <strong>End date:</strong> <span th:text="${project.endDate}"></span><br/>
+                               <strong>Start Date:</strong>
+                                    <span th:text="${project.startDate != null ? project.startDate : 'Not specified'}"></span><br/>
+                                    <strong>End date:</strong>
+                                    <span th:text="${project.endDate != null ? project.endDate : 'Not specified'}"></span><br/>
                                 </span>
-                            </p>
+                              </p>
                         </div>
                         <a class="btn btn-primary detail-btn" th:href="@{/projects/{projectId}(projectId=${project.id})}">Detail</a>
                     </div>
@@ -166,16 +180,24 @@
                             <h5 class="card-title" th:text="${userF.username}"></h5>
                             <span>Common projects: </span>
                             <span th:if="${commonProjectsMap != null and !commonProjectsMap.isEmpty() and commonProjectsMap.containsKey(userF) and !#lists.isEmpty(commonProjectsMap.get(userF))}" th:each="project : ${commonProjectsMap.get(userF)}">
-                                <span th:text="${project.name} + ' '"></span>
+                                <span th:text="${project.name} + '; '"></span>
                             </span>
                             <span th:if="${commonProjectsMap != null and !commonProjectsMap.isEmpty() and commonProjectsMap.containsKey(userF) and #lists.isEmpty(commonProjectsMap.get(userF))}">no</span>
                             <a th:href="@{/chat/findOrCreate/{friendId}(friendId=${userF.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">Chat</a>
-                            <form th:if="${user.userFriends != null and !user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/addFriend/{friendId}(friendId = ${userF.id})}">
-                                <button class="btn btn-primary"> + </button>
+                            <!-----------------------------------------------------Friends logic--------------------------------------------------------------------------------------- -->
+                            <form th:if="${user.userFriends != null and !user.userFriends.contains(userF) and user.userFriendsInvitations.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/addFriend/{friendId}(friendId = ${userF.id})}">
+                                <button class="btn btn-primary"> Add </button>
                             </form>
-                            <form th:if="${user.userFriends != null and !#lists.isEmpty(user.userFriends)  and user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;"  method="post" th:action="@{/users/removeFriend/{friendId}(friendId = ${userF.id})}">
-                                <button class="btn btn-primary"> - </button>
+                            <form th:if="${user.userFriends != null and !user.userFriends.contains(userF) and !user.userFriendsInvitations.contains(userF) and !userF.getUserFriendsInvitations().contains(user)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/addFriendInvitation/{friendId}(friendId = ${userF.id})}">
+                                <button class="btn btn-primary"> Invite </button>
                             </form>
+                            <form th:if="${user.userFriends != null and !#lists.isEmpty(user.userFriends)  and user.userFriends.contains(userF) and !user.userFriendsInvitations.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;"  method="post" th:action="@{/users/removeFriend/{friendId}(friendId = ${userF.id})}">
+                                <button class="btn btn-primary"> Remove </button>
+                            </form>
+                            <form th:if="${user.userFriends != null and !user.userFriends.contains(userF) and userF.userFriendsInvitations.contains(user)}" style="position: absolute ; right: 5px ; top: 2px ;"  method="post" th:action="@{/users/removeFriendInvitation/{friendId}(friendId = ${userF.id})}">
+                                <button class="btn btn-primary">Remove invite </button>
+                            </form>
+                            <!-----------------------------------------------------Friends logic--------------------------------------------------------------------------------------- -->
                         </div>
                     </div>
                 </div>
@@ -201,16 +223,58 @@
                         <h5 class="card-title" th:text="${userL.username}"></h5>
                         <span>Common projects: </span>
                         <span th:if="${!commonProjectsMap.get(userL).isEmpty()}" th:each="project : ${commonProjectsMap.get(userL)}">
-                        <span th:text="${project.name} + ' '"></span>
+                        <span th:text="${project.name} + '; '"></span>
                     </span>
                         <span th:if="${commonProjectsMap.get(userL).isEmpty()}">no</span>
                         <a th:href="@{/chat/findOrCreate/{friendId}(friendId=${userL.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">Chat</a>
+                        <form th:if="${user.userFriends != null and !#lists.isEmpty(user.userFriends)  and user.userFriends.contains(userL)}" style="position: absolute ; right: 5px ; top: 2px ;"  method="post" th:action="@{/users/removeFriend/{friendId}(friendId = ${userL.id})}">
+                            <button class="btn btn-primary"> Remove </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+<div class="projects-container">
+    <h2>Friends requests :</h2>
+    <form id="searchInvitationsForm" class="d-flex my-2 my-lg-0 mb-3">
+        <input id="queryInvitations" name="query" class="form-control mr-sm-2 mb-5" type="search" placeholder="title" aria-label="Search" style="width: 400px; height: 30px">
+        <button id="searchInvitationsButton" class="btn btn-primary" style="margin-left: 10px; width: 75px; height:35px">Search</button>
+    </form>
+    <div th:if="${user == null}" class="alert alert-info">
+        You must login
+    </div>
 
+    <div id="userFriendsInvList" th:fragment="userFriendsInvList" th:if="${user != null}" class="projects-list">
+        <div th:if="${friendsInvitations == null}" class="alert alert-warning">
+            User list is not available.
+        </div>
+        <div th:if="${friendsInvitations != null}">
+            <div th:if="${friendsInvitations.isEmpty()}" class="alert alert-light">
+                There are no invitations
+            </div>
+            <div class="row">
+                <div  th:each="userF : ${friendsInvitations}" class="card" style="width: 700px;">
+                    <div class="card-body" th:if="${userF != null}">
+                        <h5 class="card-title" th:text="${userF.username}"></h5>
+                        <span>Common projects: </span>
+                        <span th:if="${commonProjectsMap != null and !commonProjectsMap.isEmpty() and commonProjectsMap.containsKey(userF) and !#lists.isEmpty(commonProjectsMap.get(userF))}" th:each="project : ${commonProjectsMap.get(userF)}">
+                                <span th:text="${project.name} + '; '"></span>
+                            </span>
+                        <span th:if="${commonProjectsMap != null and !commonProjectsMap.isEmpty() and commonProjectsMap.containsKey(userF) and #lists.isEmpty(commonProjectsMap.get(userF))}">no</span>
+                        <a th:href="@{/chat/findOrCreate/{friendId}(friendId=${userF.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width:100px; height: 35px">Chat</a>
+                        <form th:if="${user.userFriends != null and !user.userFriends.contains(userF)}" style="position: absolute ; right: 5px ; top: 2px ;" method="post" th:action="@{/users/addFriend/{friendId}(friendId = ${userF.id})}">
+                            <button class="btn btn-primary">Add</button>
+                        </form>
+                        <form th:if="${user.userFriends != null and !user.userFriends.contains(userF)}" style="position: absolute ; right: 75px ; top: 2px ;"  method="post" th:action="@{/users/declineFriendInvitation/{friendId}(friendId = ${userF.id})}">
+                            <button class="btn btn-primary">Decline</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 
@@ -219,18 +283,14 @@
 <script>
 
     $(document).ready(function() {
-        // Поиск всех проектов
         $('#searchAllProjectsForm').on('submit', function(e) {
             e.preventDefault();
             searchAllProjects();
         });
-
         $('#searchAllProjectsButton').click(function(e) {
             e.preventDefault();
             searchAllProjects();
         });
-
-        // Поиск проектов пользователя
         $('#searchUserProjectsForm').on('submit', function(e) {
             e.preventDefault();
             searchUserProjects();
@@ -251,7 +311,6 @@
             searchFriendsUsers();
         });
 
-        // Поиск всех пользователей
         $('#searchAllUsersForm').on('submit', function(e) {
             e.preventDefault();
             searchAllUsers();
@@ -262,10 +321,22 @@
             searchAllUsers();
         });
 
+        // invitations
+        $('#searchInvitationsForm').on('submit', function(e) {
+            e.preventDefault();
+            searchInvitations();
+        });
+        $('#searchInvitationsButton').click(function(e) {
+            e.preventDefault();
+            searchInvitations();
+        });
         hideAlert('friendAddedAlert');
         hideAlert('friendRemovedAlert');
         hideAlert('projectDeletedAlert');
         hideAlert('operationError');
+        hideAlert('friendInvitationAdd');
+        hideAlert('friendInvitationRemove');
+        hideAlert('friendInvitationDecline');
     });
 </script>
 </body>

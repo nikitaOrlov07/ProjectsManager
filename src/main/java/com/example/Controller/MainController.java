@@ -13,6 +13,7 @@ import com.example.Service.TaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,12 +65,20 @@ public class MainController {
             allUsers.remove(user); // the user will not see himself in the list of users
 
         }
+        // Friends invitation
+        List<UserEntity> friendsInvitation = null;
+        if(user !=null && user.getUserFriendsInvitations()!=null)
+        {
+            friendsInvitation = user.getUserFriendsInvitations();
+        }
         model.addAttribute("userProjects", userProjects);
         model.addAttribute("allProjects", allProjects);
         model.addAttribute("userFriends", userFriends);
         model.addAttribute("user", user);
         model.addAttribute("commonProjectsMap", commonProjectsMap);
         model.addAttribute("userList", allUsers);
+        model.addAttribute("friendsInvitations",friendsInvitation);
+
 
         return "home-page";
     }
@@ -96,6 +105,7 @@ public class MainController {
     public String searchUser(@RequestParam(value = "query", defaultValue = " ") String query,
                              Model model,
                              @RequestParam(value = "type", defaultValue = " ") String type) {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
         if (type.equals("allProjects")) {
             model.addAttribute("allProjects", projectService.search(query, "allProjects"));
             logger.info("search logic are working for all projects");
@@ -106,7 +116,6 @@ public class MainController {
             return "home-page :: userProjects"; // userProjects fragments
         } else if (type.equals("allUsers")) {
             List<UserEntity> users = userService.search(query, type);
-            UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
             // common projects
             Map<UserEntity, List<Project>> commonProjectsMap = new HashMap<>();
             if (user != null) {
@@ -123,7 +132,6 @@ public class MainController {
             return "home-page :: userList"; // allUser fragment
         } else if (type.equals("userFriends")) {
             List<UserEntity> usersFriends = userService.search(query, type);
-            UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
             // common projects
             Map<UserEntity, List<Project>> commonProjectsMap = new HashMap<>();
             if (user != null) {
@@ -133,13 +141,25 @@ public class MainController {
                 }
                 usersFriends.remove(user); // the user will not see himself in the list of users
             }
-            System.out.println("СРАБОТАЛО");
-            usersFriends.forEach(System.out::println);
             model.addAttribute("userFriends",usersFriends);
             model.addAttribute("user", user);
             model.addAttribute("commonProjectsMap", commonProjectsMap);
             logger.info("search logic are working for users projects");
             return "home-page :: userFriends"; // userFriends fragment
+        } else if (type.equals("invitations")) {
+            List<UserEntity> users = userService.search(query,type);
+            Map<UserEntity, List<Project>> commonProjectsMap = new HashMap<>();
+            if (user != null) {
+                for (UserEntity userF : users) {
+                    List<Project> commonProjects = userService.findCommonProjects(user, userF); // find common projects
+                    commonProjectsMap.put(userF, commonProjects != null ? commonProjects : new ArrayList<>()); // add value into map
+                }
+                users.remove(user); // the user will not see himself in the list of users
+            }
+            model.addAttribute("friendsInvitations", userService.search(query,type));
+            model.addAttribute("commonProjectsMap", commonProjectsMap);
+            model.addAttribute("user", user);
+            return  "home-page :: userFriendsInvList";
         }
         return "redirect:/home";
     }

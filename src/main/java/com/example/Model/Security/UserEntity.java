@@ -66,6 +66,15 @@ public class UserEntity {
             inverseJoinColumns ={@JoinColumn(name = "friend_user_id", referencedColumnName = "id")}
     )
     private List<UserEntity> userFriends  = new ArrayList<>();
+    // friends invitations
+    @ToString.Exclude
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "friend_invitations",
+            joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
+            inverseJoinColumns ={@JoinColumn(name = "friend_user_id", referencedColumnName = "id")}
+    )
+    private List<UserEntity> userFriendsInvitations  = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable(
@@ -74,4 +83,5 @@ public class UserEntity {
             inverseJoinColumns = {@JoinColumn(name = "chat_id", referencedColumnName = "id")}
     )
     private List<Chat> chats = new ArrayList<>();
+
 }

@@ -77,6 +77,8 @@ public class UserServiceimpl implements UserService{
             case "add":
                 currentUser.getUserFriends().add(friendUser);
                 friendUser.getUserFriends().add(currentUser);
+                currentUser.getUserFriendsInvitations().remove(friendUser);
+                friendUser.getUserFriends().remove(currentUser);
                 break;
             case "remove":
                 currentUser.getUserFriends().remove(friendUser);
@@ -91,9 +93,10 @@ public class UserServiceimpl implements UserService{
         switch (type) {
             case "allUsers":
                 return userRepository.searchAllUsers(query);
-
             case "userFriends":
                 return userRepository.searchUserFriends(query);
+            case "invitations":
+                return userRepository.searchInvitations(query);
             default:
                 return null;
         }
