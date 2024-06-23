@@ -1,5 +1,7 @@
 package com.example.Controller;
 
+import com.example.Config.ChatMessage;
+import com.example.Config.MessageType;
 import com.example.Model.Chat;
 import com.example.Model.Message;
 import com.example.Model.Project;
@@ -12,6 +14,11 @@ import com.example.Service.Security.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -78,65 +85,98 @@ public class ChatController {
         }
         model.addAttribute("messages", messages);
         model.addAttribute("user",currentUser);
+        model.addAttribute("participants",chat.getParticipants().remove(currentUser));
         return "chat";
     }
-    @PostMapping("/messages/{chatId}/save")
-    public String addComment(@ModelAttribute("message") Message message, @PathVariable("chatId") Long chatId, RedirectAttributes redirectAttributes) {
-        String username = SecurityUtil.getSessionUser();
-        if (username == null) // if the user is not authorized
-        {
-            redirectAttributes.addFlashAttribute("loginError", "You must be logged in");
-            return "redirect:/login";
-        }
+    @MessageMapping("/chat/{chatId}/sendMessage")
+    @SendTo("/topic/chat/{chatId}")
+    public Message sendMessage(@DestinationVariable Long chatId, @Payload Message message,
+                               SimpMessageHeaderAccessor headerAccessor) {
+        String username = (String) headerAccessor.getSessionAttributes().get("username");
         UserEntity user = userService.findByUsername(username);
-        user.getMessages().add(message);
-        // For current date time
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        String formattedDateTime = currentDateTime.format(formatter);
-        message.setPubDate(formattedDateTime);
 
         message.setUser(user);
-
+        message.setPubDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
         messageService.saveMessage(message, chatId);
-        logger.info("Message was successfully saved");
-        return "redirect:/chat/" + chatId;
+
+        return message;
     }
-    @PostMapping("/comments/{chatId}/delete/{messageId}")
-    public String deleteMessage(@PathVariable("messageId") Long messageId, @PathVariable("chatId") Long chatId) {
-        // Take comment from database and delete it with service method and from users comment list
-        Message message = messageService.findById(messageId).get();
-        UserEntity user = userService.findById(message.getUser().getId());
-        Chat chat = chatService.findById(chatId).get();
-        user.getMessages().remove(message);
-        messageService.deleteMessage(message,user,chat);
-        logger.info("Message was successfully deleted");
-        return "redirect:/chat/" + chatId;
-    }
-    @PostMapping("/chat/{chatId}/delete")
-    public String deleteChat(@PathVariable("chatId") Long chatId)
-    {
-        Chat chat = chatService.findById(chatId).get();
-        if(chat == null)
-        {
-            return "redirect/:home?operationError";
+
+    @MessageMapping("/chat/{chatId}/addUser")
+    @SendTo("/topic/chat/{chatId}")
+    public ChatMessage addUser(@DestinationVariable Long chatId, @Payload ChatMessage chatMessage,
+                               SimpMessageHeaderAccessor headerAccessor) {
+        String username = chatMessage.getSender();
+        headerAccessor.getSessionAttributes().put("username", username);
+
+        UserEntity user = userService.findByUsername(username);
+        Chat chat = chatService.findById(chatId).orElseThrow();
+
+        if (!chat.getParticipants().contains(user)) {
+            chat.getParticipants().add(user);
+            chatService.save(chat);
         }
-        chatService.delete(chat);
-        return "redirect:/home?chatDeleteSuccessfully";
+
+        return chatMessage;
     }
-    @PostMapping("/chat/{chatId}/clear")
-    public String clearChat(@PathVariable("chatId") Long chatId)
-    {
-        UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
-        Chat chat = chatService.findById(chatId).get();
-        if(chat == null || !chat.getParticipants().contains(currentUser) || chat.getMessages().isEmpty())
-        {
-            return "redirect/:home?operationError";
+
+    @MessageMapping("/chat/{chatId}/deleteMessage")
+    @SendTo("/topic/chat/{chatId}")
+    public ChatMessage deleteMessage(@DestinationVariable Long chatId, @Payload Long messageId,
+                                     SimpMessageHeaderAccessor headerAccessor) {
+        String username = (String) headerAccessor.getSessionAttributes().get("username");
+        UserEntity user = userService.findByUsername(username);
+        Message message = messageService.findById(messageId).orElseThrow();
+        Chat chat = chatService.findById(chatId).orElseThrow();
+
+        if (message.getUser().equals(user)) {
+            messageService.deleteMessage(message, user, chat);
+            return ChatMessage.builder()
+                    .type(MessageType.DELETE)
+                    .sender(username)
+                    .content(messageId.toString())
+                    .build();
         }
-        chatService.clearMessages(chat);
-        logger.info("Chat was cleared  successfully");
-        return "redirect:/chat/"+chatId;
+
+        return null;
+    }
+
+    @MessageMapping("/chat/{chatId}/clear")
+    @SendTo("/topic/chat/{chatId}")
+    public ChatMessage clearChat(@DestinationVariable Long chatId,
+                                 SimpMessageHeaderAccessor headerAccessor) {
+        String username = (String) headerAccessor.getSessionAttributes().get("username");
+        UserEntity user = userService.findByUsername(username);
+        Chat chat = chatService.findById(chatId).orElseThrow();
+
+        if (chat.getParticipants().contains(user)) {
+            chatService.clearMessages(chat);
+            return ChatMessage.builder()
+                    .type(MessageType.CLEAR)
+                    .sender(username)
+                    .build();
+        }
+
+        return null;
+    }
+
+    @MessageMapping("/chat/{chatId}/delete")
+    @SendTo("/topic/chat/{chatId}")
+    public ChatMessage deleteChat(@DestinationVariable Long chatId,
+                                  SimpMessageHeaderAccessor headerAccessor) {
+        String username = (String) headerAccessor.getSessionAttributes().get("username");
+        UserEntity user = userService.findByUsername(username);
+        Chat chat = chatService.findById(chatId).orElseThrow();
+
+        if (chat.getParticipants().contains(user)) {
+            chatService.delete(chat);
+            return ChatMessage.builder()
+                    .type(MessageType.DELETE_CHAT)
+                    .sender(username)
+                    .build();
+        }
+
+        return null;
     }
 }

@@ -135,8 +135,8 @@
     </style>
     </style>
 </head>
-<body layout:fragment="body">
-<div class="container" >
+<body layout:fragment="body" id="chat">
+<div class="container" id="chat-page" th:data-username="${user.username}" th:data-chat-id="${chatId}" th:data-participants="${participants}">
     <div class="projects-container">
         <div class="projects-list">
             <div th:each="message : ${messages}">
