@@ -22,4 +22,5 @@ public interface UserRepository extends JpaRepository<UserEntity,Long> {
 
     @Query("SELECT p FROM UserEntity u JOIN u.userFriendsInvitations p WHERE p.username LIKE CONCAT('%', :query, '%')")
     List<UserEntity> searchInvitations(@Param("query") String query);
+
 }

@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface AttachmentRepository extends JpaRepository<Attachment,Long> {
     List<Attachment> findAllByProject (Project project);
+    List<Attachment> findAllByCreator(String creator);
 }

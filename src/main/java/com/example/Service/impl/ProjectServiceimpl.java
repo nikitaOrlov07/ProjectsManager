@@ -10,7 +10,6 @@ import com.example.Service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.security.Security;
 import java.util.*;
 
 @Service
@@ -63,4 +62,5 @@ public class ProjectServiceimpl implements ProjectService {
           taskService.delete(project.getTasks());
           projectRepository.delete(project);
     }
+
 }

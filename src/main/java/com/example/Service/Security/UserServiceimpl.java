@@ -1,16 +1,23 @@
 package com.example.Service.Security;
 
 import com.example.Dto.security.RegistrationDto;
+import com.example.Model.Attachment;
+import com.example.Model.Chat;
+import com.example.Model.Message;
 import com.example.Model.Project;
 import com.example.Model.Security.RoleEntity;
 import com.example.Model.Security.UserEntity;
+import com.example.Repository.AttachmentRepository;
 import com.example.Repository.MessageRepository;
 import com.example.Repository.Security.RoleRepository;
 import com.example.Repository.Security.UserRepository;
+import com.example.Service.ChatService;
+import com.example.Service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -19,15 +26,16 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceimpl implements UserService{
     private UserRepository userRepository; private RoleRepository roleRepository;  // implements methods from repositories
-    private PasswordEncoder passwordEncoder;  private MessageRepository messageRepository;
+    private PasswordEncoder passwordEncoder;  private MessageRepository messageRepository; private AttachmentRepository attachmentRepository; private ChatService chatService;
     @Autowired
-    public UserServiceimpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, MessageRepository messageRepository) {
+    public UserServiceimpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, MessageRepository messageRepository ,  AttachmentRepository attachmentRepository,ChatService chatService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
-
+        this.attachmentRepository = attachmentRepository;
         this.messageRepository = messageRepository;
-    } // Technically we don`t need a constructor , but it is good practice
+        this.chatService=chatService;
+    }
 
     @Override
     public void saveUser(RegistrationDto registrationDto) {
@@ -109,6 +117,41 @@ public class UserServiceimpl implements UserService{
 
     @Override
     public void delete(UserEntity deletedUser) {
+        // Delete user from projects
+        List<Project> projects = new ArrayList<>(deletedUser.getCurrentProjects());
+        for (Project project : projects) {
+            project.getInvolvedUsers().remove(deletedUser);
+        }
+
+        // Delete user from his friends
+        List<UserEntity> friends = new ArrayList<>(deletedUser.getUserFriends());
+        for (UserEntity friend : friends) {
+            friend.getUserFriends().remove(deletedUser);
+        }
+
+        // Delete all attachments
+        List<Attachment> attachments = attachmentRepository.findAllByCreator(deletedUser.getUsername());
+        for (Attachment attachment : attachments) {
+            attachmentRepository.delete(attachment);
+        }
+
+        // Delete user chats
+        List<Chat> chats = chatService.findAllByParticipants(deletedUser);
+        for (Chat chat : chats) {
+            chat.getParticipants().remove(deletedUser);
+            List<Message> messages = new ArrayList<>(chat.getMessages());
+            for (Message message : messages) {
+                if (message.getUser().equals(deletedUser)) {
+                    chat.getMessages().remove(message);
+                }
+            }
+            if (chat.getParticipants().isEmpty()) {
+                chatService.delete(chat);
+            }
+        }
+
+
+        // Удаляем пользователя из репозитория
         userRepository.delete(deletedUser);
     }
 

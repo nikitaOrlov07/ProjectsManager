@@ -55,7 +55,7 @@ public class UserEntity {
     private List<Project> currentProjects  = new ArrayList<>();
 
     // comments in Projects
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)  // one user --> many comments in comment side i have @ ManyToone annotation
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL , orphanRemoval = true)  // one user --> many comments in comment side i have @ ManyToone annotation
     private List<Message> messages = new ArrayList<>();
     // friends
     @ToString.Exclude
@@ -76,7 +76,7 @@ public class UserEntity {
     )
     private List<UserEntity> userFriendsInvitations  = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "users_chats",
             joinColumns = {@JoinColumn(name ="user_id", referencedColumnName ="id")},
