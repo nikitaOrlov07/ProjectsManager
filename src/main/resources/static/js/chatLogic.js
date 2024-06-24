@@ -1,5 +1,6 @@
 let stompClient = null;
 let chatId, username,participants;
+let isFirstJoin = true; // Flag to track the first join
 
 document.addEventListener('DOMContentLoaded', function () {
     const chatContainer = document.getElementById('chat-page');
@@ -48,15 +49,85 @@ function connect() {
         console.log('Connected: ' + frame);
         subscribeToChat(chatId);
         addUser();
+        updateUserStatus(username, true);
+        stompClient.send("/app/chat/" + chatId + "/userStatus", {}, JSON.stringify({username: username, status: 'ONLINE'}));
     });
 }
 
 function subscribeToChat(chatId) {
     stompClient.subscribe('/topic/chat/' + chatId, function (response) {
-        showMessage(JSON.parse(response.body));
+        console.log('Получено сообщение:', response.body);
+        const message = JSON.parse(response.body);
+        if (message.type === 'JOIN' && isFirstJoin) {
+            showJoinMessage(message);
+            isFirstJoin = false; // Сбрасываем флаг после первого присоединения
+        } else if (message.type !== 'JOIN') {
+            showMessage(message);
+        }
     });
 }
 
+function showJoinMessage(message) {
+    const chatContainer = document.querySelector('.projects-list');
+    const joinMessageDiv = document.createElement('div');
+    joinMessageDiv.className = 'join-message';
+    joinMessageDiv.textContent = `${message.sender} присоединился к чату`;
+    chatContainer.appendChild(joinMessageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+function showMessage(message) {
+    // Проверка на наличие текста сообщения
+    if (!message.text || message.text.trim() === '') {
+        console.log('Получено пустое сообщение:', message);
+        return; // Не отображаем пустые сообщения
+    }
+
+    const chatContainer = document.querySelector('.projects-list');
+    const currentUsername = document.getElementById('chat-page').dataset.username;
+
+    const messageDiv = document.createElement('div');
+    const messageContent = document.createElement('div');
+    const authorParagraph = document.createElement('p');
+    const textParagraph = document.createElement('p');
+    const dateParagraph = document.createElement('p');
+
+    authorParagraph.className = 'message-author';
+    textParagraph.className = 'message-text';
+    dateParagraph.className = 'message-text';
+
+    if (message.author === currentUsername) {
+        messageDiv.className = 'message message-right';
+        authorParagraph.textContent = 'You:';
+
+        const deleteForm = document.createElement('form');
+        deleteForm.method = 'post';
+        deleteForm.action = `/comments/${message.chatId}/delete/${message.id}`;
+        deleteForm.style = 'position: absolute;right: 5px; top: 0;';
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'btn btn-primary';
+        deleteButton.textContent = 'Delete';
+
+        deleteForm.appendChild(deleteButton);
+        messageContent.appendChild(deleteForm);
+    } else {
+        messageDiv.className = 'message message-left';
+        authorParagraph.textContent = message.author;
+    }
+
+    textParagraph.textContent = message.text;
+    dateParagraph.textContent = message.pubDate || new Date().toLocaleString();
+
+    messageContent.style = 'display: flex; justify-content: space-between; flex-grow: 1;';
+    messageContent.appendChild(authorParagraph);
+    messageContent.appendChild(textParagraph);
+
+    messageDiv.appendChild(messageContent);
+    messageDiv.appendChild(dateParagraph);
+
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
 function addUser() {
     stompClient.send("/app/chat/" + chatId + "/addUser",
         {},
@@ -71,12 +142,13 @@ function addUser() {
                         chatId = message.chatId;
                         stompClient.unsubscribe('/topic/chat/' + chatId);
                         subscribeToChat(chatId);
-                        // Здесь можно добавить логику для обновления URL или других элементов UI
+                        console.log("User added to chat");
                         window.history.pushState({}, '', '/chat/' + chatId);
+                        isFirstJoin = true; // Сбрасываем флаг, так как это новый чат
                     }
-                    // Здесь можно добавить логику для обновления UI
                 } else {
                     console.log('User already in chat');
+                    isFirstJoin = false;
                 }
             }
         }
@@ -88,12 +160,12 @@ function sendMessage() {
     const messageContent = messageInput.value.trim();
     console.log("Sent message: " + messageContent);
     if (messageContent && stompClient) {
-        const chatMessage = {
-            sender: username,
-            content: messageContent,
+        const message = {
+            author: username,
+            text: messageContent,
             type: 'CHAT'
         };
-        stompClient.send("/app/chat/" + chatId + "/sendMessage", {}, JSON.stringify(chatMessage));
+        stompClient.send("/app/chat/" + chatId + "/sendMessage", {}, JSON.stringify(message));
         messageInput.value = '';
     }
     updateCharCount();
@@ -116,51 +188,6 @@ function deleteChat() {
         stompClient.send("/app/chat/" + chatId + "/delete", {}, {});
     }
 }
-
-function showMessage(message) {
-    const chatContainer = document.querySelector('.projects-list');
-    const currentUsername = document.getElementById('chat-page').dataset.username;
-
-    const messageDiv = document.createElement('div');
-    messageDiv.classList.add('message');
-
-    if (message.author === currentUsername) {
-        messageDiv.classList.add('message-right');
-        messageDiv.innerHTML = `
-            <div style="position: relative">
-                <div style="display: flex; justify-content: space-between; flex-grow: 1;">
-                    <div>
-                        <p class="message-author">You:</p>
-                        <p class="message-text">${escapeHtml(message.text)}</p>
-                    </div>
-                    <div style="position: absolute; right: 0px; bottom: 0px;">
-                        <p class="message-text">${message.pubDate}</p>
-                    </div>
-                    <form style="position: absolute; right: 5px; top: 0;" method="post" action="/messages/${message.chat.id}/delete/${message.id}">
-                        <button class="btn btn-primary">Delete</button>
-                    </form>
-                </div>
-            </div>
-        `;
-    } else {
-        messageDiv.classList.add('message-left');
-        messageDiv.innerHTML = `
-            <div style="display: flex; justify-content: space-between; flex-grow: 1;">
-                <div>
-                    <p class="message-author">${escapeHtml(message.author)}</p>
-                    <p class="message-text">${escapeHtml(message.text)}</p>
-                </div>
-            </div>
-            <div style="align-self: flex-end; text-align: right;">
-                <p class="message-text">${message.pubDate}</p>
-            </div>
-        `;
-    }
-
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
 function escapeHtml(unsafe) {
     return unsafe
         .replace(/&/g, "&amp;")

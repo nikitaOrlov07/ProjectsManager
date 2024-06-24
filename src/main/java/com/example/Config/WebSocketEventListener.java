@@ -1,5 +1,6 @@
 package com.example.Config;
 
+import com.example.Model.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -22,9 +23,9 @@ public class WebSocketEventListener {
         String username = (String) headerAccessor.getSessionAttributes().get("username");
         if (username != null) {
             log.info("user disconnected: {}", username);
-            var chatMessage = ChatMessage.builder()
+            var chatMessage = Message.builder()
                     .type(MessageType.LEAVE)
-                    .sender(username)
+                    .author(username)
                     .build();
             messagingTemplate.convertAndSend("/topic/public", chatMessage);
         }

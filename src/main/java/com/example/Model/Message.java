@@ -1,6 +1,7 @@
 package com.example.Model;
 
 
+import com.example.Config.MessageType;
 import com.example.Model.Security.UserEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -22,15 +23,14 @@ public class Message {
     private String text;
     private String author;
     private String pubDate;
+    private MessageType type;
+
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id")
     private Chat chat;
 
-    // likes and dislikes
-    private int likes = 0;
-    private int dislikes = 0;
 
     // it is for "comment-list"
     @ManyToOne(fetch = FetchType.LAZY)

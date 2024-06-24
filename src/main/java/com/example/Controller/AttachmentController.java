@@ -104,7 +104,7 @@ public class AttachmentController {
     @GetMapping("/view/{fileId}")
     public ResponseEntity<Resource> viewFile(@PathVariable("fileId") Long fileId) throws Exception {
         UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
-        Project project = attachmentService.findById(fileId).getProject();
+        Project project = attachmentService.getAttachment(fileId).getProject();
         if(currentUser == null || !project.getInvolvedUsers().contains(currentUser))
         {
             String redirectUrl = "/home";
@@ -125,8 +125,7 @@ public class AttachmentController {
     // Delete the attachment
     @PostMapping("/projects/{projectId}/delete/{fileId}")
     public ResponseEntity<Object> deleteFile(@PathVariable("projectId") Long projectId,
-                                             @PathVariable("fileId") Long fileId)
-    {
+                                             @PathVariable("fileId") Long fileId) throws Exception {
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
         if(user == null || !projectService.findById(projectId).getInvolvedUsers().contains(user))
         {

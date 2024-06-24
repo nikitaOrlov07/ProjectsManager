@@ -22,6 +22,6 @@ public interface AttachmentService {
     @Transactional
     List<Attachment> findAllByProject(Project project);
 
-    void deleteAttachment(Long projectId, Long fileId);
-    Attachment findById(Long attachmentId);
+    void deleteAttachment(Long projectId, Long fileId) throws Exception;
+
 }

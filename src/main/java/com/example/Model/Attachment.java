@@ -2,15 +2,13 @@ package com.example.Model;
 
 import com.example.Model.Security.UserEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Data
 @NoArgsConstructor
-
+@AllArgsConstructor
+@Builder
 public class Attachment {
 
     @Id

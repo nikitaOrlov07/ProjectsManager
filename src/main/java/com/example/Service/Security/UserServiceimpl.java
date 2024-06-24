@@ -13,6 +13,7 @@ import com.example.Repository.Security.RoleRepository;
 import com.example.Repository.Security.UserRepository;
 import com.example.Service.ChatService;
 import com.example.Service.ProjectService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -58,7 +59,7 @@ public class UserServiceimpl implements UserService{
     public UserEntity findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
-
+    @Transactional
     @Override
     public UserEntity findByUsername(String username) {
        return  userRepository.findByUsername(username);

@@ -65,6 +65,7 @@ public class AttachmentServiceimpl implements AttachmentService {
         attachmentRepository.save(attachment);
 
     }
+    @Transactional
     @Override
     public Attachment getAttachment(Long fileId) throws Exception {
         return attachmentRepository.findById(fileId).orElseThrow(()-> new Exception("File not found with id "+ fileId));
@@ -75,17 +76,14 @@ public class AttachmentServiceimpl implements AttachmentService {
     public List<Attachment> findAllByProject(Project project) {
         return attachmentRepository.findAllByProject(project);
     }
-    @Transactional // operations with large objects must be transactional
+
     @Override
-    public void deleteAttachment(Long projectId, Long fileId) {
+    @Transactional // operations with large objects must be transactional
+    public void deleteAttachment(Long projectId, Long fileId) throws Exception {
         Project project = projectService.findById(projectId);
-        Attachment attachment = findById(fileId);
+        Attachment attachment = getAttachment(fileId);
         project.getAttachments().remove(attachment);
         attachmentRepository.delete(attachment);
     }
 
-    @Override
-    public Attachment findById(Long attachmentId) {
-        return  attachmentRepository.findById(attachmentId).get();
-    }
 }
