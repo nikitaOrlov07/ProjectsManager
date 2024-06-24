@@ -28,9 +28,8 @@ public class MessageServiceimpl implements MessageService {
         return messageRepository.findAllByChatId(chaId);
     }
     @Override
-    public Message saveMessage(Message message,Long chatId) {
+    public Message saveMessage(Message message,Long chatId,UserEntity user) {
 
-        UserEntity user =userService.findByUsername(SecurityUtil.getSessionUser());
         Chat chat = chatService.findById(chatId).get();
 
         message.setChat(chat);

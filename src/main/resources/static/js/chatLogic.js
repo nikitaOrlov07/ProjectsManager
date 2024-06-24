@@ -46,18 +46,40 @@ function connect() {
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/chat/' + chatId, function (response) {
-            showMessage(JSON.parse(response.body));
-        });
-
+        subscribeToChat(chatId);
         addUser();
+    });
+}
+
+function subscribeToChat(chatId) {
+    stompClient.subscribe('/topic/chat/' + chatId, function (response) {
+        showMessage(JSON.parse(response.body));
     });
 }
 
 function addUser() {
     stompClient.send("/app/chat/" + chatId + "/addUser",
         {},
-        JSON.stringify({sender: username, type: 'JOIN'})
+        JSON.stringify({sender: username, type: 'JOIN', chatId: chatId}),
+        function(response) {
+            if (response.body) {
+                let message = JSON.parse(response.body);
+                if (message) {
+                    console.log('User added to chat or chat created');
+                    if (message.chatId && message.chatId !== chatId) {
+                        // Новый чат был создан, обновляем chatId и подписку
+                        chatId = message.chatId;
+                        stompClient.unsubscribe('/topic/chat/' + chatId);
+                        subscribeToChat(chatId);
+                        // Здесь можно добавить логику для обновления URL или других элементов UI
+                        window.history.pushState({}, '', '/chat/' + chatId);
+                    }
+                    // Здесь можно добавить логику для обновления UI
+                } else {
+                    console.log('User already in chat');
+                }
+            }
+        }
     );
 }
 

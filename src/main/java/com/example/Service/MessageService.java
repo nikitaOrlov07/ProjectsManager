@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface MessageService {
     List<Message> findAllChatMessage(Long chaId);
-    Message saveMessage(Message comment,Long chatId);
+    Message saveMessage(Message comment,Long chatId, UserEntity user);
 
     Optional<Message> findById(Long messageId);
 

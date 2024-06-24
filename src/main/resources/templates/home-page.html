@@ -144,7 +144,7 @@
                             <span th:if="${chat.getParticipants() != null}" th:each="participant : ${chat.getParticipants()}">
                                         <span th:if="${!user.username.equals(participant.username)}"th:text="${participant.username} + ' '"></span>
                                         <br>
-                                        <span th:if="${!user.username.equals(participant.username) and user.}"th:text="${participant.username} + ' '"></span>
+                                        <span th:if="${!user.username.equals(participant.username)}"th:text="${participant.username} + ' '"></span>
                             </span>
                             <a th:href="@{/chat/{chatId}(chatId=${chat.id})}" class="btn btn-primary detail-btn" style="position: absolute; right: 5px; bottom: 5px; width: 100px; height: 35px">Chat</a>
                         </div>

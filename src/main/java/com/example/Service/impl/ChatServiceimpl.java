@@ -7,6 +7,7 @@ import com.example.Repository.ChatRepository;
 import com.example.Repository.MessageRepository;
 import com.example.Service.ChatService;
 import com.example.Service.Security.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class ChatServiceimpl implements ChatService {
     @Autowired
     private ChatRepository chatRepository;
@@ -25,6 +27,7 @@ public class ChatServiceimpl implements ChatService {
     private UserService userService;
     @Autowired
     private MessageRepository messageRepository;
+    @Transactional
     @Override
     public Optional<Chat> findById(Long chatId) {
         return chatRepository.findById(chatId);
@@ -35,25 +38,31 @@ public class ChatServiceimpl implements ChatService {
         chatRepository.save(chat);
     }
 
+    @Transactional
     @Override
     public Chat findOrCreateChat(UserEntity currentUser, UserEntity secondUser) {
+        // Reboot users to make sure they are in the "managed" state (not detached)
+        currentUser = userService.findById(currentUser.getId());
+        secondUser = userService.findById(secondUser.getId());
+
         List<Chat> existingChats = chatRepository.findByParticipantsContains(currentUser);
 
         for (Chat chat : existingChats) {
             if (chat.getParticipants().contains(secondUser)) {
-                System.out.println("Was returned existed chat ");
-                return chat; // if participants have already had chat -> it will return
+              log.info("was returned existing chat");
+                return chat;
             }
         }
 
-        Chat newChat = new Chat(); // if participants have not already had chat -> will create a new chat
+        Chat newChat = new Chat();
         newChat.getParticipants().add(currentUser);
         newChat.getParticipants().add(secondUser);
         chatRepository.save(newChat);
-        System.out.println("was returned new chat");
+        log.info("was returned new chat");
         return newChat;
     }
 
+    @Transactional
     @Override
     public void save(Chat chat) {
         chatRepository.save(chat);

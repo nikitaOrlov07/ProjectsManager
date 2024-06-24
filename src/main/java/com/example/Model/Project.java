@@ -1,6 +1,7 @@
 package com.example.Model;
 
 import com.example.Model.Security.UserEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,17 +25,19 @@ public class Project {
     private String endDate;
     private  String password;
     @ToString.Exclude
-    @ManyToMany(mappedBy = "currentProjects")
+    @JsonIgnore
+    @ManyToMany(mappedBy = "currentProjects", fetch = FetchType.EAGER)
     private List<UserEntity> involvedUsers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "project",fetch = FetchType.EAGER,cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "chat_id", referencedColumnName = "id")
     private Chat chat;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "project",fetch = FetchType.EAGER ,cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Attachment> attachments = new ArrayList<>();
 
 }

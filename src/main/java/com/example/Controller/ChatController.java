@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -92,13 +93,17 @@ public class ChatController {
     @SendTo("/topic/chat/{chatId}")
     public Message sendMessage(@DestinationVariable Long chatId, @Payload Message message,
                                SimpMessageHeaderAccessor headerAccessor) {
-        String username = (String) headerAccessor.getSessionAttributes().get("username");
+        String username = SecurityUtil.getSessionUser(headerAccessor.getUser());
+        if (username == null) {
+            throw new IllegalStateException("User not authenticated");
+        }
+
         UserEntity user = userService.findByUsername(username);
 
         message.setUser(user);
         message.setPubDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
-        messageService.saveMessage(message, chatId);
+        messageService.saveMessage(message, chatId ,user);
 
         return message;
     }
@@ -110,17 +115,32 @@ public class ChatController {
         String username = chatMessage.getSender();
         headerAccessor.getSessionAttributes().put("username", username);
 
-        UserEntity user = userService.findByUsername(username);
+        UserEntity currentUser = userService.findByUsername(username);
         Chat chat = chatService.findById(chatId).orElseThrow();
 
-        if (!chat.getParticipants().contains(user)) {
-            chat.getParticipants().add(user);
-            chatService.save(chat);
+        // Check , is the user already in the chat
+        if (!chat.getParticipants().contains(currentUser)) {
+            UserEntity otherUser = userService.findById(
+                    chat.getParticipants().stream()
+                            .filter(u -> !u.getUsername().equals(username))
+                            .findFirst()
+                            .orElseThrow()
+                            .getId()
+            );
+
+            chat = chatService.findOrCreateChat(currentUser, otherUser);
+
+            // if was created a new chat -> update id
+            if (!chat.getId().equals(chatId)) {
+                chatMessage.setChatId(chat.getId());
+            }
+
+            return chatMessage;
+        } else {
+            // user is already a member of the chat
+            return null;
         }
-
-        return chatMessage;
     }
-
     @MessageMapping("/chat/{chatId}/deleteMessage")
     @SendTo("/topic/chat/{chatId}")
     public ChatMessage deleteMessage(@DestinationVariable Long chatId, @Payload Long messageId,

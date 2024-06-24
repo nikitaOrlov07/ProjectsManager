@@ -3,6 +3,7 @@ package com.example.Model.Security;
 import com.example.Model.Chat;
 import com.example.Model.Message;
 import com.example.Model.Project;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,7 +47,7 @@ public class UserEntity {
         return false;
     }
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "users_projects",
             joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
@@ -55,11 +56,12 @@ public class UserEntity {
     private List<Project> currentProjects  = new ArrayList<>();
 
     // comments in Projects
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL , orphanRemoval = true)  // one user --> many comments in comment side i have @ ManyToone annotation
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL , orphanRemoval = true)  // one user --> many comments in comment side i have @ ManyToone annotation
     private List<Message> messages = new ArrayList<>();
     // friends
     @ToString.Exclude
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "users_friends",
             joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
@@ -68,7 +70,7 @@ public class UserEntity {
     private List<UserEntity> userFriends  = new ArrayList<>();
     // friends invitations
     @ToString.Exclude
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "friend_invitations",
             joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
@@ -76,7 +78,8 @@ public class UserEntity {
     )
     private List<UserEntity> userFriendsInvitations  = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "users_chats",
             joinColumns = {@JoinColumn(name ="user_id", referencedColumnName ="id")},

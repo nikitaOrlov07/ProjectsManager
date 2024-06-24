@@ -133,7 +133,9 @@
             border-color: #bd2130;
         }
     </style>
-    </style>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script th:src="@{/js/chatLogic.js}"></script>
 </head>
 <body layout:fragment="body" id="chat">
 <div class="container" id="chat-page" th:data-username="${user.username}" th:data-chat-id="${chatId}" th:data-participants="${participants}">
@@ -184,12 +186,12 @@
     </div>
 
     <!-- Form for adding message -->
-    <form th:action="@{/messages/{chatId}/save(chatId=${chatId})}" method="post" style="margin-top: 50px;">
+    <form id="messageForm" style="margin-top: 50px;">
         <textarea id="commentText" name="text" placeholder="write your message ..." required rows="7" cols="200" style="resize: none;" maxlength="300" oninput="updateCharCount()"></textarea>
         <div style="color: white">
             <span id="charCount">0</span>/300 characters used
         </div>
-        <input type="hidden" th:value="${chatId}" name="chat" />
+        <input type="hidden" id="chatId" th:value="${chatId}" name="chat" />
         <button type="submit" class="btn" style="margin-bottom: 50px;">Send</button>
     </form>
 
