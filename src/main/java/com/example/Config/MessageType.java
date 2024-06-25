@@ -5,5 +5,6 @@ public enum MessageType {
     JOIN,
     LEAVE,
     DELETE,
-    CLEAR, DELETE_CHAT
+    CLEAR,
+    CHAT_DELETED
 }

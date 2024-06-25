@@ -1,5 +1,7 @@
 package com.example.Service.impl;
 
+import com.example.Dto.ProjectDto;
+import com.example.Model.Chat;
 import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
 import com.example.Repository.ProjectRepository;
@@ -7,6 +9,7 @@ import com.example.Repository.Security.UserRepository;
 import com.example.Security.SecurityUtil;
 import com.example.Service.ProjectService;
 import com.example.Service.TaskService;
+import com.example.mappers.ProjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,6 +64,20 @@ public class ProjectServiceimpl implements ProjectService {
           users.forEach(user -> {user.getCurrentProjects().remove(project);});
           taskService.delete(project.getTasks());
           projectRepository.delete(project);
+    }
+    @Override
+    public ProjectDto createProject(ProjectDto projectDto, UserEntity user)
+    {
+        Project project = ProjectMapper.projectDtotoProject(projectDto);
+        save(project);
+        Chat chat = new Chat();
+        project.setChat(chat);
+        List<UserEntity> involvedUsers = new ArrayList<>(Arrays.asList(user));
+        project.setInvolvedUsers(involvedUsers);
+        user.getCurrentProjects().add(project);
+        save(project);
+
+        return ProjectMapper.projectToProjectDto(project) ;
     }
 
 }

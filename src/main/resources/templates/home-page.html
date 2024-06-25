@@ -35,6 +35,9 @@
 <div th:if="${param.friendInvitationdeclineSuccess != null}" class="alert alert-success" id="friendInvitationDecline">
     Friend invite was successfully declined
 </div>
+<div th:if="${param.chatDeleteSuccess != null}" class="alert alert-success" id="chatDelete">
+    Chat was successfully deleted
+</div>
 <div class="container" style="margin-top: 10px">
     <div class="projects-container" th:if="${allProjects != null}">
         <h2>All available projects:</h2>

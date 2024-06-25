@@ -1,5 +1,6 @@
 package com.example.Service;
 
+import com.example.Dto.ProjectDto;
 import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
 
@@ -16,4 +17,6 @@ public interface ProjectService {
     void save (Project project);
 
     void delete(Project project);
+
+    ProjectDto createProject(ProjectDto projectDto, UserEntity user);
 }

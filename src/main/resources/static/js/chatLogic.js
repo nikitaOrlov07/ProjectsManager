@@ -1,5 +1,5 @@
 let stompClient = null;
-let chatId, username, participants;
+let chatId, username, participants,messageId;
 let isFirstJoin = true; // Flag to track the first join
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -17,11 +17,6 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         sendMessage();
     });
-    document.getElementById('deleteMessageForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        deleteMessage();
-    });
-
 
     const deleteChatForm = document.querySelector('form[action$="/delete"]');
     if (deleteChatForm) {
@@ -32,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
 
     const clearChatForm = document.querySelector('form[action$="/clear"]');
     if (clearChatForm) {
@@ -46,14 +42,46 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize character counter
     updateCharCount();
 });
+function deleteChat() {
+    if (stompClient && stompClient.connected) {
+        stompClient.send("/app/chat/" + chatId + "/delete", {}, JSON.stringify({chatId: chatId}));
+    } else {
+        console.error("Cannot delete chat: stompClient is not connected");
+    }
+}
+
+function handleChatDeleted() {
+    const chatContainer = document.querySelector('.projects-list');
+    const deletedMessageDiv = document.createElement('div');
+    deletedMessageDiv.className = 'chat-deleted-message';
+    deletedMessageDiv.textContent = 'This chat has been deleted.';
+    chatContainer.innerHTML = ''; // Очищаем чат
+    chatContainer.appendChild(deletedMessageDiv);
+
+    // Отключаем форму отправки сообщений
+    const messageForm = document.getElementById('messageForm');
+    if (messageForm) {
+        messageForm.style.display = 'none';
+    }
+
+    // Отключаем кнопку удаления чата
+    const deleteChatForm = document.querySelector('form[action$="/delete"]');
+    if (deleteChatForm) {
+        deleteChatForm.style.display = 'none';
+    }
+}
 
 function connect() {
+    console.log("Connecting to WebSocket...");
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         console.log('Connected: ' + frame);
+        console.log('StompClient ready:', stompClient);
         subscribeToChat(chatId);
         addUser();
+    }, function(error) {
+        console.error('STOMP error:', error);
     });
 }
 
@@ -63,11 +91,26 @@ function subscribeToChat(chatId) {
         const message = JSON.parse(response.body);
         if (message.type === 'JOIN' && isFirstJoin) {
             showJoinMessage(message);
-            isFirstJoin = false; // Reset flag after first join
+            isFirstJoin = false;
+        } else if (message.type === 'DELETE') {
+            handleDeletedMessage(message);
+        } else if (message.type === 'CHAT_DELETED') {
+            handleChatDeleted();
         } else if (message.type !== 'JOIN') {
             showMessage(message);
         }
     });
+}
+
+function handleDeletedMessage(message) {
+    console.log("Handling deleted message:", message);
+    const messageId = message.text; // Assuming the server sends the deleted message ID in the 'text' field
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (messageElement) {
+        messageElement.remove();
+    } else {
+        console.error("Could not find message element to delete");
+    }
 }
 
 function showJoinMessage(message) {
@@ -90,6 +133,7 @@ function showMessage(message) {
     const currentUsername = document.getElementById('chat-page').dataset.username;
 
     const messageDiv = document.createElement('div');
+    messageDiv.dataset.messageId = message.id;
     const messageContent = document.createElement('div');
     const authorParagraph = document.createElement('p');
     const textParagraph = document.createElement('p');
@@ -103,17 +147,23 @@ function showMessage(message) {
         messageDiv.className = 'message message-right';
         authorParagraph.textContent = 'You:';
 
-        const deleteForm = document.createElement('form');
-        deleteForm.method = 'post';
-        deleteForm.action = `/comments/${chatId}/delete/${message.id}`;
-        deleteForm.style = 'position: absolute; right: 5px; top: 0;';
-
         const deleteButton = document.createElement('button');
         deleteButton.className = 'btn btn-primary';
         deleteButton.textContent = 'Delete';
+        deleteButton.style.width = 'auto';
+        deleteButton.style.height = 'auto';
+        deleteButton.style.position = 'absolute';
+        deleteButton.style.right = '20px';
+        deleteButton.style.top = '3px';
+        deleteButton.type = 'button';
+        deleteButton.onclick = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            console.log("Delete button clicked for message:", message.id);
+            deleteMessage(message.id);
+        };
 
-        deleteForm.appendChild(deleteButton);
-        messageDiv.appendChild(deleteForm);
+        messageDiv.appendChild(deleteButton);
     } else {
         messageDiv.className = 'message message-left';
         authorParagraph.textContent = message.author;
@@ -126,6 +176,7 @@ function showMessage(message) {
     messageContent.appendChild(authorParagraph);
     messageContent.appendChild(textParagraph);
 
+    messageDiv.style.position = 'relative';  // Ensure that messageDiv is the positioning context for the delete button
     messageDiv.appendChild(messageContent);
     messageDiv.appendChild(dateParagraph);
 
@@ -178,8 +229,16 @@ function sendMessage() {
 }
 
 function deleteMessage(messageId) {
-    if (stompClient) {
-        stompClient.send("/app/chat/" + chatId + "/deleteMessage", {}, messageId);
+    console.log("deleteMessage function called with messageId:", messageId);
+    console.log("Current chatId:", chatId);
+    if (stompClient && messageId && chatId) {
+        console.log("Attempting to delete message. ChatId:", chatId, "MessageId:", messageId);
+        stompClient.send("/app/chat/" + chatId + "/deleteMessage", {}, JSON.stringify({messageId: messageId}));
+    } else {
+        console.error("Cannot delete message: stompClient is not connected, messageId is undefined, or chatId is undefined");
+        console.log("stompClient:", stompClient);
+        console.log("messageId:", messageId);
+        console.log("chatId:", chatId);
     }
 }
 

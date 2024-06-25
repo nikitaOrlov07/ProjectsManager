@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
+import java.util.Optional;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(connection = EmbeddedDatabaseConnection.H2) // configure H2 database
@@ -100,10 +102,25 @@ public class ProjectRepositoryTest {
         Assertions.assertNotNull(returnedProjects);
         Assertions.assertFalse(returnedProjects.isEmpty());
         Project returnedProject = returnedProjects.get(0);
-        Assertions.assertEquals(project.getName(), returnedProject.getName());
-        Assertions.assertEquals(project.getDescription(), returnedProject.getDescription());
-        Assertions.assertEquals(project.getCategory(), returnedProject.getCategory());
-        Assertions.assertEquals(project.getStartDate(), returnedProject.getStartDate());
-        Assertions.assertEquals(project.getEndDate(), returnedProject.getEndDate());
+        Assertions.assertEquals(project, returnedProject);
+
+    }
+    @Test
+    public void ProjectRepository_DeleteProject_ReturnNull()
+    {
+        Project project = Project.builder()
+                .name("project")
+                .description("description")
+                .category("category")
+                .startDate("25-50-30")
+                .endDate("25-50-30")
+                .build();
+
+        projectRepository.save(project);
+        projectRepository.delete(project);
+        Optional<Project> returnedProject = projectRepository.findById(project.getId());
+
+        Assertions.assertTrue(returnedProject.isEmpty());
+
     }
 }

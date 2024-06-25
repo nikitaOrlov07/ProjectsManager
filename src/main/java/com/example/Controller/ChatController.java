@@ -2,6 +2,7 @@ package com.example.Controller;
 
 
 import com.example.Config.MessageType;
+import com.example.Dto.DeleteMessageRequest;
 import com.example.Model.Chat;
 import com.example.Model.Message;
 import com.example.Model.Project;
@@ -11,6 +12,7 @@ import com.example.Service.ChatService;
 import com.example.Service.MessageService;
 import com.example.Service.ProjectService;
 import com.example.Service.Security.UserService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +41,8 @@ public class ChatController {
     private UserService userService;
     private MessageService messageService;
     private ChatService chatService;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
     @Autowired
@@ -148,23 +153,27 @@ public class ChatController {
 
     @MessageMapping("/chat/{chatId}/deleteMessage")
     @SendTo("/topic/chat/{chatId}")
-    public Message deleteMessage(@DestinationVariable Long chatId, @Payload Long messageId,
+    @Transactional
+    public Message deleteMessage(@DestinationVariable Long chatId, @Payload DeleteMessageRequest request,
                                  SimpMessageHeaderAccessor headerAccessor) {
         String username = (String) headerAccessor.getSessionAttributes().get("username");
         UserEntity user = userService.findByUsername(username);
-        Message message = messageService.findById(messageId).orElseThrow();
+        Message message = messageService.findById(request.getMessageId()).orElseThrow();
         Chat chat = chatService.findById(chatId).orElseThrow();
-
-        if (message.getUser().equals(user)) {
+        logger.info("Delete message controller in working");
+        if (message != null && chat != null && message.getUser().equals(user)) {
             messageService.deleteMessage(message, user, chat);
+            logger.info("Message deleted successfully");
             return Message.builder()
                     .type(MessageType.DELETE)
                     .author(username)
-                    .text(messageId.toString())
+                    .id(request.getMessageId()) // Добавьте это
+                    .text(request.getMessageId().toString())
                     .build();
+        } else {
+            logger.warn("Could not delete message. User mismatch or message/chat not found.");
+            return null;
         }
-
-        return null;
     }
 
     @MessageMapping("/chat/{chatId}/clear")
@@ -186,23 +195,23 @@ public class ChatController {
         return null;
     }
 
-
-    @MessageMapping("/chat/{chatId}/delete")
-    @SendTo("/topic/chat/{chatId}")
-    public Message deleteChat(@DestinationVariable Long chatId,
-                              SimpMessageHeaderAccessor headerAccessor) {
-        String username = (String) headerAccessor.getSessionAttributes().get("username");
-        UserEntity user = userService.findByUsername(username);
+    @PostMapping("/chat/{chatId}/delete")
+    public String deleteChat(@PathVariable("chatId") Long chatId) {
+        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
         Chat chat = chatService.findById(chatId).orElseThrow();
 
         if (chat.getParticipants().contains(user)) {
             chatService.delete(chat);
-            return Message.builder()
-                    .type(MessageType.DELETE_CHAT)
-                    .author(username)
-                    .build();
+
+            // Отправляем сообщение всем участникам чата о его удалении
+             Message deleteMessage = new Message();
+            deleteMessage.setType(MessageType.CHAT_DELETED);
+            deleteMessage.setText("Chat has been deleted");
+            messagingTemplate.convertAndSend("/topic/chat/" + chatId, deleteMessage);
+
+            return "redirect:/home?chatDeleteSuccess";
         }
 
-        return null;
+        return "redirect:/home?operationError";
     }
 }

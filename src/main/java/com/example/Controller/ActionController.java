@@ -94,16 +94,7 @@ public class ActionController {
             model.addAttribute("projectDto", projectDto);
             return "create-project";
         }
-
-        Project project = ProjectMapper.projectDtotoProject(projectDto);
-        projectService.save(project);
-
-        Chat chat = new Chat();
-        project.setChat(chat);
-        List<UserEntity> involvedUsers = new ArrayList<>(Arrays.asList(user));
-        project.setInvolvedUsers(involvedUsers);
-        user.getCurrentProjects().add(project);
-        projectService.save(project);
+        ProjectDto project = projectService.createProject(projectDto,user);
         return "redirect:/projects/" + project.getId();
     }
     // update project

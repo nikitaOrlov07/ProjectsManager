@@ -6,6 +6,7 @@ import com.example.Model.Security.UserEntity;
 import com.example.Repository.ChatRepository;
 import com.example.Repository.MessageRepository;
 import com.example.Service.ChatService;
+import com.example.Service.MessageService;
 import com.example.Service.Security.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class ChatServiceimpl implements ChatService {
     private UserService userService;
     @Autowired
     private MessageRepository messageRepository;
+    @Lazy
+    @Autowired
+    private MessageService messageService;
     @Transactional
     @Override
     public Optional<Chat> findById(Long chatId) {
@@ -74,6 +78,10 @@ public class ChatServiceimpl implements ChatService {
         for(UserEntity user : participants) {
             user.getChats().remove(chat);
             chat.getParticipants().remove(user);
+        }
+        List<Message> messages = messageRepository.findAllByChatId(chat.getId());
+        for(Message message : messages) {
+            messageService.deleteMessage(message,message.getUser(),chat);
         }
         chatRepository.delete(chat);
     }

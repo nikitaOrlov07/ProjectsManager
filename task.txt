@@ -4,4 +4,5 @@ Project manager
 Можно добавить категории проэктов
 ПРОБЛЕМА - > надо реализовать чтобы около ника пользователя в чате  - > эсли тип в чате -> около его имени зеленый кружок -> в html chat уже есть код надо реализовать js
 2 ПРОБЛЕМА -> когда тип первый раз зашел в чат -> user присоеденился к чату - плохотработает почти не отображается
-3 ПРОБЛЕМА -> реализовать все функции (delte,clear...)
+3 ПРОБЛЕМА -> delete chat не работает
+проблема в тесте java.lang.NullPointerException: Cannot invoke "com.example.Repository.ProjectRepository.save(Object)" because "this.projectRepository" is null
