@@ -148,6 +148,15 @@
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
     <script th:src="@{/js/chatLogic.js}"></script>
+    <style>
+        .message-join {
+            text-align: center;
+            background-color: #e6e6e6;
+            padding: 5px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        </style>
 </head>
 <body layout:fragment="body" id="chat">
 <div class="container" id="chat-page" th:data-username="${user.username}" th:data-chat-id="${chatId}" th:data-participants="${participants}">
@@ -164,7 +173,7 @@
                             <div  style="position: absolute ; right: 0px ; bottom:0px;">
                                 <p class="message-text" th:text="${message.pubDate}"></p>
                             </div>
-                            <form style="position: absolute;right: 5px; top: 0;" method="post" onclick="deleteMessage()">
+                            <form style="position: absolute;right: 5px; top: 0;" method="post" id="deleteMessageForm">
                                 <button class="btn btn-primary"> Delete </button>
                             </form>
                         </div>

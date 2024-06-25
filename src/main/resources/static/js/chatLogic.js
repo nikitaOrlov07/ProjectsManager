@@ -1,5 +1,5 @@
 let stompClient = null;
-let chatId, username,participants;
+let chatId, username, participants;
 let isFirstJoin = true; // Flag to track the first join
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (chatContainer) {
         chatId = chatContainer.dataset.chatId;
         username = chatContainer.dataset.username;
-        participants =  chatContainer.dataset.participants;
+        participants = chatContainer.dataset.participants;
         connect();
     } else {
         console.error('Element with id "chat-page" not found');
@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         sendMessage();
     });
+    document.getElementById('deleteMessageForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        deleteMessage();
+    });
+
 
     const deleteChatForm = document.querySelector('form[action$="/delete"]');
     if (deleteChatForm) {
@@ -38,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Инициализация счетчика символов
+    // Initialize character counter
     updateCharCount();
 });
 
@@ -49,18 +54,16 @@ function connect() {
         console.log('Connected: ' + frame);
         subscribeToChat(chatId);
         addUser();
-        updateUserStatus(username, true);
-        stompClient.send("/app/chat/" + chatId + "/userStatus", {}, JSON.stringify({username: username, status: 'ONLINE'}));
     });
 }
 
 function subscribeToChat(chatId) {
     stompClient.subscribe('/topic/chat/' + chatId, function (response) {
-        console.log('Получено сообщение:', response.body);
+        console.log('Received message:', response.body);
         const message = JSON.parse(response.body);
         if (message.type === 'JOIN' && isFirstJoin) {
             showJoinMessage(message);
-            isFirstJoin = false; // Сбрасываем флаг после первого присоединения
+            isFirstJoin = false; // Reset flag after first join
         } else if (message.type !== 'JOIN') {
             showMessage(message);
         }
@@ -71,15 +74,16 @@ function showJoinMessage(message) {
     const chatContainer = document.querySelector('.projects-list');
     const joinMessageDiv = document.createElement('div');
     joinMessageDiv.className = 'join-message';
-    joinMessageDiv.textContent = `${message.sender} присоединился к чату`;
+    joinMessageDiv.textContent = `${message.author} joined the chat`;
     chatContainer.appendChild(joinMessageDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
+
 function showMessage(message) {
-    // Проверка на наличие текста сообщения
+    // Check for empty message
     if (!message.text || message.text.trim() === '') {
-        console.log('Получено пустое сообщение:', message);
-        return; // Не отображаем пустые сообщения
+        console.log('Received empty message:', message);
+        return; // Don't display empty messages
     }
 
     const chatContainer = document.querySelector('.projects-list');
@@ -101,15 +105,15 @@ function showMessage(message) {
 
         const deleteForm = document.createElement('form');
         deleteForm.method = 'post';
-        deleteForm.action = `/comments/${message.chatId}/delete/${message.id}`;
-        deleteForm.style = 'position: absolute;right: 5px; top: 0;';
+        deleteForm.action = `/comments/${chatId}/delete/${message.id}`;
+        deleteForm.style = 'position: absolute; right: 5px; top: 0;';
 
         const deleteButton = document.createElement('button');
         deleteButton.className = 'btn btn-primary';
         deleteButton.textContent = 'Delete';
 
         deleteForm.appendChild(deleteButton);
-        messageContent.appendChild(deleteForm);
+        messageDiv.appendChild(deleteForm);
     } else {
         messageDiv.className = 'message message-left';
         authorParagraph.textContent = message.author;
@@ -128,23 +132,25 @@ function showMessage(message) {
     chatContainer.appendChild(messageDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
+
+
 function addUser() {
     stompClient.send("/app/chat/" + chatId + "/addUser",
         {},
-        JSON.stringify({sender: username, type: 'JOIN', chatId: chatId}),
+        JSON.stringify({author: username, type: 'JOIN', chat: {id: chatId}}),
         function(response) {
             if (response.body) {
                 let message = JSON.parse(response.body);
                 if (message) {
                     console.log('User added to chat or chat created');
-                    if (message.chatId && message.chatId !== chatId) {
-                        // Новый чат был создан, обновляем chatId и подписку
-                        chatId = message.chatId;
+                    if (message.chat && message.chat.id !== chatId) {
+                        // New chat was created, update chatId and subscription
+                        chatId = message.chat.id;
                         stompClient.unsubscribe('/topic/chat/' + chatId);
                         subscribeToChat(chatId);
                         console.log("User added to chat");
                         window.history.pushState({}, '', '/chat/' + chatId);
-                        isFirstJoin = true; // Сбрасываем флаг, так как это новый чат
+                        isFirstJoin = true; // Reset flag as this is a new chat
                     }
                 } else {
                     console.log('User already in chat');
@@ -163,7 +169,7 @@ function sendMessage() {
         const message = {
             author: username,
             text: messageContent,
-            type: 'CHAT'
+            type: 'CHAT',
         };
         stompClient.send("/app/chat/" + chatId + "/sendMessage", {}, JSON.stringify(message));
         messageInput.value = '';
@@ -188,6 +194,7 @@ function deleteChat() {
         stompClient.send("/app/chat/" + chatId + "/delete", {}, {});
     }
 }
+
 function escapeHtml(unsafe) {
     return unsafe
         .replace(/&/g, "&amp;")

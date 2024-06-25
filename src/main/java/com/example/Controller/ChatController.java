@@ -1,6 +1,6 @@
 package com.example.Controller;
 
-import com.example.Config.ChatMessage;
+
 import com.example.Config.MessageType;
 import com.example.Model.Chat;
 import com.example.Model.Message;
@@ -34,17 +34,21 @@ import java.util.List;
 
 @Controller
 public class ChatController {
-    private ProjectService projectService; private UserService userService; private MessageService messageService; private ChatService chatService;
+    private ProjectService projectService;
+    private UserService userService;
+    private MessageService messageService;
+    private ChatService chatService;
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
     @Autowired
-    public ChatController(ProjectService projectService, UserService userService,MessageService messageService,ChatService chatService) {
+    public ChatController(ProjectService projectService, UserService userService, MessageService messageService, ChatService chatService) {
         this.projectService = projectService;
         this.userService = userService;
-        this.messageService=messageService;
-        this.chatService=chatService;
+        this.messageService = messageService;
+        this.chatService = chatService;
     }
-    // find existing chat or create new beetween two people
+
+    // find existing chat or create new beetween two people for "home-page"
     @GetMapping("/chat/findOrCreate/{secondId}")
     public String findOrCreateChat(@PathVariable("secondId") Long secondId, Model model) {
         String currentUsername = SecurityUtil.getSessionUser();
@@ -58,37 +62,36 @@ public class ChatController {
         Chat chat = chatService.findOrCreateChat(currentUser, secondUser);
         return "redirect:/chat/" + chat.getId();
     }
+
     @GetMapping("/project/{projectId}/chat/{chatId}")
     public String getChat(@PathVariable("chatId") Long chatId,
                           Model model,
-                          @PathVariable("projectId") Long projectId)
-    {
+                          @PathVariable("projectId") Long projectId) {
         List<Message> messages = messageService.findAllChatMessage(chatId);
         UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
         Project project = projectService.findById(projectId);
-        if(SecurityUtil.getSessionUser() == null || SecurityUtil.getSessionUser().isEmpty() || (!project.getInvolvedUsers().contains(currentUser)))
-        {
-            return  "redirect:/home";
+        if (SecurityUtil.getSessionUser() == null || SecurityUtil.getSessionUser().isEmpty() || (!project.getInvolvedUsers().contains(currentUser))) {
+            return "redirect:/home";
         }
         model.addAttribute("messages", messages);
-        model.addAttribute("user",currentUser);
+        model.addAttribute("user", currentUser);
         return "chat";
     }
+
     @GetMapping("/chat/{chatId}")
-    public String getChat(@PathVariable("chatId") Long chatId, Model model)
-    {
+    public String getChat(@PathVariable("chatId") Long chatId, Model model) {
         Chat chat = chatService.findById(chatId).get();
         List<Message> messages = messageService.findAllChatMessage(chatId);
         UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
-        if(SecurityUtil.getSessionUser() == null || SecurityUtil.getSessionUser().isEmpty() || (!chat.getParticipants().contains(currentUser)))
-        {
-            return  "redirect:/home";
+        if (SecurityUtil.getSessionUser() == null || SecurityUtil.getSessionUser().isEmpty() || (!chat.getParticipants().contains(currentUser))) {
+            return "redirect:/home";
         }
         model.addAttribute("messages", messages);
-        model.addAttribute("user",currentUser);
-        model.addAttribute("participants",chat.getParticipants().remove(currentUser));
+        model.addAttribute("user", currentUser);
+        model.addAttribute("participants", chat.getParticipants().remove(currentUser));
         return "chat";
     }
+
     @MessageMapping("/chat/{chatId}/sendMessage")
     @SendTo("/topic/chat/{chatId}")
     public Message sendMessage(@DestinationVariable Long chatId, @Payload Message message,
@@ -103,22 +106,23 @@ public class ChatController {
         message.setUser(user);
         message.setPubDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
-        messageService.saveMessage(message, chatId ,user);
+        messageService.saveMessage(message, chatId, user);
 
         return message;
     }
 
     @MessageMapping("/chat/{chatId}/addUser")
     @SendTo("/topic/chat/{chatId}")
-    public ChatMessage addUser(@DestinationVariable Long chatId, @Payload ChatMessage chatMessage,
-                               SimpMessageHeaderAccessor headerAccessor) {
-        String username = chatMessage.getSender();
-        headerAccessor.getSessionAttributes().put("username", username);
+    public Message addUser(@DestinationVariable Long chatId, @Payload Message message,
+                           SimpMessageHeaderAccessor headerAccessor) {
+        String username = message.getAuthor();
+            headerAccessor.getSessionAttributes().put("username", username);
+
 
         UserEntity currentUser = userService.findByUsername(username);
         Chat chat = chatService.findById(chatId).orElseThrow();
 
-        // Check , is the user already in the chat
+        // Check if the user is already in the chat
         if (!chat.getParticipants().contains(currentUser)) {
             UserEntity otherUser = userService.findById(
                     chat.getParticipants().stream()
@@ -130,21 +134,22 @@ public class ChatController {
 
             chat = chatService.findOrCreateChat(currentUser, otherUser);
 
-            // if was created a new chat -> update id
+            // if a new chat was created -> update id
             if (!chat.getId().equals(chatId)) {
-                chatMessage.setChatId(chat.getId());
+                message.setChat(chat);
             }
 
-            return chatMessage;
+            return message;
         } else {
             // user is already a member of the chat
             return null;
         }
     }
+
     @MessageMapping("/chat/{chatId}/deleteMessage")
     @SendTo("/topic/chat/{chatId}")
-    public ChatMessage deleteMessage(@DestinationVariable Long chatId, @Payload Long messageId,
-                                     SimpMessageHeaderAccessor headerAccessor) {
+    public Message deleteMessage(@DestinationVariable Long chatId, @Payload Long messageId,
+                                 SimpMessageHeaderAccessor headerAccessor) {
         String username = (String) headerAccessor.getSessionAttributes().get("username");
         UserEntity user = userService.findByUsername(username);
         Message message = messageService.findById(messageId).orElseThrow();
@@ -152,10 +157,10 @@ public class ChatController {
 
         if (message.getUser().equals(user)) {
             messageService.deleteMessage(message, user, chat);
-            return ChatMessage.builder()
+            return Message.builder()
                     .type(MessageType.DELETE)
-                    .sender(username)
-                    .content(messageId.toString())
+                    .author(username)
+                    .text(messageId.toString())
                     .build();
         }
 
@@ -164,36 +169,37 @@ public class ChatController {
 
     @MessageMapping("/chat/{chatId}/clear")
     @SendTo("/topic/chat/{chatId}")
-    public ChatMessage clearChat(@DestinationVariable Long chatId,
-                                 SimpMessageHeaderAccessor headerAccessor) {
+    public Message clearChat(@DestinationVariable Long chatId,
+                             SimpMessageHeaderAccessor headerAccessor) {
         String username = (String) headerAccessor.getSessionAttributes().get("username");
         UserEntity user = userService.findByUsername(username);
         Chat chat = chatService.findById(chatId).orElseThrow();
 
         if (chat.getParticipants().contains(user)) {
             chatService.clearMessages(chat);
-            return ChatMessage.builder()
+            return Message.builder()
                     .type(MessageType.CLEAR)
-                    .sender(username)
+                    .author(username)
                     .build();
         }
 
         return null;
     }
 
+
     @MessageMapping("/chat/{chatId}/delete")
     @SendTo("/topic/chat/{chatId}")
-    public ChatMessage deleteChat(@DestinationVariable Long chatId,
-                                  SimpMessageHeaderAccessor headerAccessor) {
+    public Message deleteChat(@DestinationVariable Long chatId,
+                              SimpMessageHeaderAccessor headerAccessor) {
         String username = (String) headerAccessor.getSessionAttributes().get("username");
         UserEntity user = userService.findByUsername(username);
         Chat chat = chatService.findById(chatId).orElseThrow();
 
         if (chat.getParticipants().contains(user)) {
             chatService.delete(chat);
-            return ChatMessage.builder()
+            return Message.builder()
                     .type(MessageType.DELETE_CHAT)
-                    .sender(username)
+                    .author(username)
                     .build();
         }
 
