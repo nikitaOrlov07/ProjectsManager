@@ -12,6 +12,8 @@ import com.example.Service.ChatService;
 import com.example.Service.MessageService;
 import com.example.Service.ProjectService;
 import com.example.Service.Security.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +73,7 @@ public class ChatController {
     @GetMapping("/project/{projectId}/chat/{chatId}")
     public String getChat(@PathVariable("chatId") Long chatId,
                           Model model,
-                          @PathVariable("projectId") Long projectId) {
+                          @PathVariable("projectId") Long projectId) throws JsonProcessingException {
         List<Message> messages = messageService.findAllChatMessage(chatId);
         UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
         Project project = projectService.findById(projectId);
@@ -79,12 +81,14 @@ public class ChatController {
             return "redirect:/home";
         }
         model.addAttribute("messages", messages);
+        model.addAttribute("messagesJson", new ObjectMapper().writeValueAsString(messages));
+
         model.addAttribute("user", currentUser);
         return "chat";
     }
 
     @GetMapping("/chat/{chatId}")
-    public String getChat(@PathVariable("chatId") Long chatId, Model model) {
+    public String getChat(@PathVariable("chatId") Long chatId, Model model) throws JsonProcessingException {
         Chat chat = chatService.findById(chatId).get();
         List<Message> messages = messageService.findAllChatMessage(chatId);
         UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
@@ -92,6 +96,7 @@ public class ChatController {
             return "redirect:/home";
         }
         model.addAttribute("messages", messages);
+        model.addAttribute("messagesJson", new ObjectMapper().writeValueAsString(messages));
         model.addAttribute("user", currentUser);
         model.addAttribute("participants", chat.getParticipants().remove(currentUser));
         return "chat";
@@ -121,7 +126,7 @@ public class ChatController {
     public Message addUser(@DestinationVariable Long chatId, @Payload Message message,
                            SimpMessageHeaderAccessor headerAccessor) {
         String username = message.getAuthor();
-            headerAccessor.getSessionAttributes().put("username", username);
+        headerAccessor.getSessionAttributes().put("username", username);
 
 
         UserEntity currentUser = userService.findByUsername(username);
@@ -151,6 +156,34 @@ public class ChatController {
         }
     }
 
+    @MessageMapping("/chat/{chatId}/delete")
+    @SendTo("/topic/chat/{chatId}")
+    public Message deleteChat(@DestinationVariable Long chatId, Principal principal) {
+        String username = SecurityUtil.getSessionUser(principal);
+        UserEntity user = userService.findByUsername(username);
+        Chat chat = chatService.findById(chatId).orElseThrow();
+        logger.info("Delete chat controller method is working");
+
+        // implement "List.contains()" logic -> if i use regular contains method -> won`t working
+        boolean userInChat = chat.getParticipants().stream()
+                .anyMatch(participant -> participant.getId().equals(user.getId()));
+
+        boolean chatInUserChats = user.getChats().stream()
+                .anyMatch(userChat -> userChat.getId().equals(chat.getId()));
+
+        if (chat != null && userInChat && chatInUserChats) {
+            chatService.delete(chat);
+            logger.info("Chat was deleted successfully");
+            return Message.builder()
+                    .type(MessageType.CHAT_DELETED)
+                    .author(username)
+                    .text("Chat deleted")
+                    .build();
+        } else {
+            logger.warn("Error deleting chat. User in chat: {}, Chat in user chats: {}", userInChat, chatInUserChats);
+            return null;
+        }
+    }
     @MessageMapping("/chat/{chatId}/deleteMessage")
     @SendTo("/topic/chat/{chatId}")
     @Transactional
@@ -167,7 +200,7 @@ public class ChatController {
             return Message.builder()
                     .type(MessageType.DELETE)
                     .author(username)
-                    .id(request.getMessageId()) // Добавьте это
+                    .id(request.getMessageId())
                     .text(request.getMessageId().toString())
                     .build();
         } else {
@@ -175,6 +208,7 @@ public class ChatController {
             return null;
         }
     }
+
 
     @MessageMapping("/chat/{chatId}/clear")
     @SendTo("/topic/chat/{chatId}")
@@ -184,34 +218,24 @@ public class ChatController {
         UserEntity user = userService.findByUsername(username);
         Chat chat = chatService.findById(chatId).orElseThrow();
 
-        if (chat.getParticipants().contains(user)) {
+        // implement "List.contains()" logic -> if i use regular contains method -> won`t working
+        boolean userInChat = chat.getParticipants().stream()
+                .anyMatch(participant -> participant.getId().equals(user.getId()));
+
+        boolean chatInUserChats = user.getChats().stream()
+                .anyMatch(userChat -> userChat.getId().equals(chat.getId()));
+
+        logger.info("Chat clearing controller method is working");
+        if (chat != null && chatInUserChats && userInChat) {
             chatService.clearMessages(chat);
             return Message.builder()
                     .type(MessageType.CLEAR)
                     .author(username)
+                    .text("Chat was cleared")
                     .build();
         }
 
+        logger.warn("Chat clearing failed");
         return null;
-    }
-
-    @PostMapping("/chat/{chatId}/delete")
-    public String deleteChat(@PathVariable("chatId") Long chatId) {
-        UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
-        Chat chat = chatService.findById(chatId).orElseThrow();
-
-        if (chat.getParticipants().contains(user)) {
-            chatService.delete(chat);
-
-            // Отправляем сообщение всем участникам чата о его удалении
-             Message deleteMessage = new Message();
-            deleteMessage.setType(MessageType.CHAT_DELETED);
-            deleteMessage.setText("Chat has been deleted");
-            messagingTemplate.convertAndSend("/topic/chat/" + chatId, deleteMessage);
-
-            return "redirect:/home?chatDeleteSuccess";
-        }
-
-        return "redirect:/home?operationError";
     }
 }

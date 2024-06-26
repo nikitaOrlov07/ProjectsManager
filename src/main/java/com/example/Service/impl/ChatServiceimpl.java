@@ -26,8 +26,7 @@ public class ChatServiceimpl implements ChatService {
     @Lazy // Create a bean only when program will need it.
     @Autowired
     private UserService userService;
-    @Autowired
-    private MessageRepository messageRepository;
+
     @Lazy
     @Autowired
     private MessageService messageService;
@@ -59,9 +58,20 @@ public class ChatServiceimpl implements ChatService {
         }
 
         Chat newChat = new Chat();
-        newChat.getParticipants().add(currentUser);
-        newChat.getParticipants().add(secondUser);
+        newChat.addParticipant(currentUser);
+        newChat.addParticipant(secondUser);
+
+
+
+        // create new chat
         chatRepository.save(newChat);
+        if((currentUser.getChats().contains(newChat) && secondUser.getChats().contains(newChat)) &&  (newChat.getParticipants().contains(currentUser) && (newChat.getParticipants().contains(secondUser))))
+        {
+            log.info("users were added to chat participants");
+        }
+        else
+            log.error("users were not added to chat participants");
+
         log.info("was returned new chat");
         return newChat;
     }
@@ -72,6 +82,7 @@ public class ChatServiceimpl implements ChatService {
         chatRepository.save(chat);
     }
 
+    @Transactional
     @Override
     public void delete(Chat chat) {
         List<UserEntity> participants = new ArrayList<>(chat.getParticipants());
@@ -79,10 +90,7 @@ public class ChatServiceimpl implements ChatService {
             user.getChats().remove(chat);
             chat.getParticipants().remove(user);
         }
-        List<Message> messages = messageRepository.findAllByChatId(chat.getId());
-        for(Message message : messages) {
-            messageService.deleteMessage(message,message.getUser(),chat);
-        }
+        messageService.deleteAllByChat(chat);
         chatRepository.delete(chat);
     }
     @Override
@@ -100,7 +108,7 @@ public class ChatServiceimpl implements ChatService {
                 user.getMessages().remove(message);
             }
             chat.getMessages().remove(message);
-            messageRepository.delete(message);
+            messageService.delete(message);
         }
         chatRepository.save(chat);
     }

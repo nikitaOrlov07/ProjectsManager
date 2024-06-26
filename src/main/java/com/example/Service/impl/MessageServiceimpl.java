@@ -3,9 +3,7 @@ package com.example.Service.impl;
 import com.example.Model.Chat;
 import com.example.Model.Message;
 import com.example.Model.Security.UserEntity;
-import com.example.Repository.ChatRepository;
 import com.example.Repository.MessageRepository;
-import com.example.Security.SecurityUtil;
 import com.example.Service.ChatService;
 import com.example.Service.MessageService;
 import com.example.Service.Security.UserService;
@@ -46,6 +44,16 @@ public class MessageServiceimpl implements MessageService {
     public void deleteMessage(Message message, UserEntity user , Chat chat) {
         user.getMessages().remove(message);
         chat.getMessages().remove(message);
+        messageRepository.delete(message);
+    }
+    @Override
+    public void deleteAllByChat(Chat chat)
+    {
+        messageRepository.deleteAllByChat(chat);
+    }
+
+    @Override
+    public void delete(Message message) {
         messageRepository.delete(message);
     }
 

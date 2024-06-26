@@ -18,26 +18,18 @@ document.addEventListener('DOMContentLoaded', function () {
         sendMessage();
     });
 
-    const deleteChatForm = document.querySelector('form[action$="/delete"]');
-    if (deleteChatForm) {
-        deleteChatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (confirmDelete()) {
-                deleteChat();
-            }
-        });
-    }
 
+    document.getElementById('deleteChatForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        confirmDelete();
+        deleteChat();
+    });
 
-    const clearChatForm = document.querySelector('form[action$="/clear"]');
-    if (clearChatForm) {
-        clearChatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (confirmDelete()) {
-                clearChat();
-            }
-        });
-    }
+    document.getElementById('clearChatForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        confirmDelete();
+        clearChat();
+    });
 
     // Initialize character counter
     updateCharCount();
@@ -49,16 +41,22 @@ function deleteChat() {
         console.error("Cannot delete chat: stompClient is not connected");
     }
 }
+function clearChat() {
+    if (stompClient && stompClient.connected) {
+        stompClient.send("/app/chat/" + chatId + "/clear", {}, JSON.stringify({chatId: chatId}));
+    } else {
+        console.error("Cannot clear chat: stompClient is not connected");
+    }
+}
 
 function handleChatDeleted() {
     const chatContainer = document.querySelector('.projects-list');
     const deletedMessageDiv = document.createElement('div');
     deletedMessageDiv.className = 'chat-deleted-message';
     deletedMessageDiv.textContent = 'This chat has been deleted.';
-    chatContainer.innerHTML = ''; // Очищаем чат
+    chatContainer.innerHTML = '';
     chatContainer.appendChild(deletedMessageDiv);
 
-    // Отключаем форму отправки сообщений
     const messageForm = document.getElementById('messageForm');
     if (messageForm) {
         messageForm.style.display = 'none';
@@ -70,6 +68,15 @@ function handleChatDeleted() {
         deleteChatForm.style.display = 'none';
     }
 }
+function handleChatCleared() {
+    const chatContainer = document.querySelector('.projects-list');
+    chatContainer.innerHTML = '';
+
+    const clearedMessageDiv = document.createElement('div');
+    clearedMessageDiv.className = 'chat-cleared-message';
+    clearedMessageDiv.textContent = 'Chat was cleared';
+    chatContainer.appendChild(clearedMessageDiv);
+}
 
 function connect() {
     console.log("Connecting to WebSocket...");
@@ -80,6 +87,8 @@ function connect() {
         console.log('StompClient ready:', stompClient);
         subscribeToChat(chatId);
         addUser();
+
+        JSON.parse(initialMessages).forEach(showMessage); // display saved messages from database
     }, function(error) {
         console.error('STOMP error:', error);
     });
@@ -96,6 +105,8 @@ function subscribeToChat(chatId) {
             handleDeletedMessage(message);
         } else if (message.type === 'CHAT_DELETED') {
             handleChatDeleted();
+        } else if (message.type === 'CLEAR') {
+            handleChatCleared();
         } else if (message.type !== 'JOIN') {
             showMessage(message);
         }

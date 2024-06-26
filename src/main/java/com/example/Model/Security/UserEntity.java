@@ -9,6 +9,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -33,8 +34,8 @@ public class UserEntity {
     @JoinTable(
             name = "users_role",joinColumns = {@JoinColumn(name ="user_id",referencedColumnName ="id")},
             inverseJoinColumns ={@JoinColumn(name = "role_id", referencedColumnName = "id")}
-    )// с помощью этой аннотации Spring сам создаст Join- таблицу
-    private List<RoleEntity> roles = new ArrayList<>(); // список ролей для данного пользователя. Каждый пользователь может иметь список ролей.
+    )
+    private List<RoleEntity> roles = new ArrayList<>();
     public boolean hasAdminRole() {
         if (roles == null) {
             return false;
@@ -79,12 +80,21 @@ public class UserEntity {
     private List<UserEntity> userFriendsInvitations  = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "users_chats",
-            joinColumns = {@JoinColumn(name ="user_id", referencedColumnName ="id")},
-            inverseJoinColumns = {@JoinColumn(name = "chat_id", referencedColumnName = "id")}
-    )
+    @ManyToMany(mappedBy = "participants", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE , CascadeType.REFRESH})
     private List<Chat> chats = new ArrayList<>();
 
+
+    // without this -> will be error in ChatController - deleteChat
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserEntity)) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 }
