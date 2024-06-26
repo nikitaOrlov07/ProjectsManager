@@ -86,11 +86,18 @@ public class ChatServiceimpl implements ChatService {
     @Override
     public void delete(Chat chat) {
         List<UserEntity> participants = new ArrayList<>(chat.getParticipants());
-        for(UserEntity user : participants) {
-            user.getChats().remove(chat);
-            chat.getParticipants().remove(user);
+        if(participants != null && !participants.isEmpty()) {
+            for (UserEntity user : participants) {
+                user.getChats().remove(chat);
+                chat.getParticipants().remove(user);
+            }
         }
-        messageService.deleteAllByChat(chat);
+        List<Message> messages = chat.getMessages();
+        if(messages != null && !messages.isEmpty()) {
+            for (Message message : messages) {
+                messageService.deleteMessage(message, message.getUser(), chat);
+            }
+        }
         chatRepository.delete(chat);
     }
     @Override
@@ -108,7 +115,7 @@ public class ChatServiceimpl implements ChatService {
                 user.getMessages().remove(message);
             }
             chat.getMessages().remove(message);
-            messageService.delete(message);
+            messageService.deleteMessage(message,message.getUser(),chat);
         }
         chatRepository.save(chat);
     }

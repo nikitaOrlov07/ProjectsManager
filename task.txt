@@ -2,9 +2,12 @@ Project manager
 календарь
 на главную страницу можно добавить список пользователей , где изначально будут отображены только 10 пользователей (последних созданных , или смотря по городу) но можно будет ввести в поиск nick и найти кого надо и добавить  в друзья
 Можно добавить категории проэктов
-ПРОБЛЕМА - > надо реализовать чтобы около ника пользователя в чате  - > эсли тип в чате -> около его имени зеленый кружок -> в html chat уже есть код надо реализовать js
-2 ПРОБЛЕМА -> когда тип первый раз зашел в чат -> user присоеденился к чату - сделать так чтобы отправлялось сообщение но с другим стилем
-4 ПРОБЛЕМА -> WebSocket чат не работает для чата проэкта надо исправить
-5 проблема - хочу чтобы когда очищаешь чат спрашивало только у себя или у всех
+ГЛАВНАЯ ПРОБЛЕМА : НАДО СДЕЛАТЬ НАСТРОИТЬ ВЕБСОКЕТ ЧАТЫ ДЛЯ ПРОЭЕКТОВ , УЖЕ КАК ТОЛЬКО
+ЗАХОЖУ В ЧАТ ПОЯВЛЯЕТСЯ ТАКАЯ ПРОБЛЕМА
 
+java.util.NoSuchElementException: No value present
+	at java.base/java.util.Optional.orElseThrow(Optional.java:377) ~[na:na]
+	at com.example.Controller.ChatController.addUser(ChatController.java:141) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
 

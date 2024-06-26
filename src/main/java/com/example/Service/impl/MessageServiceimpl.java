@@ -46,16 +46,5 @@ public class MessageServiceimpl implements MessageService {
         chat.getMessages().remove(message);
         messageRepository.delete(message);
     }
-    @Override
-    public void deleteAllByChat(Chat chat)
-    {
-        messageRepository.deleteAllByChat(chat);
-    }
-
-    @Override
-    public void delete(Message message) {
-        messageRepository.delete(message);
-    }
-
-
+    
 }

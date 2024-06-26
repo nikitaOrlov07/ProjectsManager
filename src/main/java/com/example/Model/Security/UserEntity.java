@@ -4,6 +4,7 @@ import com.example.Model.Chat;
 import com.example.Model.Message;
 import com.example.Model.Project;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Builder
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserEntity {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)

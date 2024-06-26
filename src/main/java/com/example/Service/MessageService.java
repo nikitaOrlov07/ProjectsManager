@@ -15,7 +15,7 @@ public interface MessageService {
 
     void deleteMessage(Message message, UserEntity user , Chat chat);
 
-    void deleteAllByChat(Chat chat);
 
-    void delete(Message message);
+
+
 }

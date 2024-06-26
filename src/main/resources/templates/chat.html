@@ -9,15 +9,7 @@
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
     <script th:src="@{/js/chatLogic.js}"></script>
     <link rel="stylesheet" th:href="@{/css/chatStyles.css}" />
-    <style>
-        .message-join {
-            text-align: center;
-            background-color: #e6e6e6;
-            padding: 5px;
-            margin: 10px 0;
-            border-radius: 5px;
-        }
-        </style>
+
 </head>
 <body layout:fragment="body" id="chat">
 <div class="container" id="chat-page" th:data-username="${user.username}" th:data-chat-id="${chatId}" th:data-participants="${participants}">
