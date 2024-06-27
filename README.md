@@ -19,7 +19,7 @@ All features available to unauthenticated users, plus:
 - Access and use chat functionality
 - Create project-specific chats
 - Create project
-- User can see their personal information
+- Users can see their personal information (Profil)
 - Set passwords for project access
 - For all projects, user projects, all users, user friends, and requests to add to friends added search and when searching will be updated not the entire page, but the desired fragment  
 
