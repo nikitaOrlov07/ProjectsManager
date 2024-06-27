@@ -58,11 +58,11 @@ All features available to unauthenticated users, plus:
 ### Detail page
 ![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/d8adab55-cb86-4653-bfea-e65277ebfbdf)
 ![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/3097e4d3-4a62-4167-b4c3-f36cb9aa10b1)
-*page where the project is being worked on *
+*page where the project is being worked on.*
 ### Chat page
 ![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/854be572-6480-4b6a-b7c6-b172b75b5375)
-*page where you can communicate with other users * 
+*page where you can communicate with other users.* 
 ### Login and Register Pages
 ![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/5b8cea26-5de0-4d88-9fe5-af80fdfe55e3)
-*page where you can login or create a new account*
+*page where you can login or create a new account.*
 
