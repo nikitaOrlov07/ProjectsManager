@@ -23,9 +23,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
     // configure "loadByUsername"
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {//Он загружает пользователя по имени пользователя.
-        // Если пользователь найден, метод возвращает объект UserDetails, который представляет пользователя в контексте Spring Security.
-        // Если пользователь не найден, метод выбрасывает исключение UsernameNotFoundException.
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {//It loads the user by username.
+        //If the user is found, the method returns a UserDetails object that represents the user in the Spring Security context.
+        //If the user is not found, the method throws a UsernameNotFoundException exception.
         UserEntity userEntity=userRepository.findFirstByUsername(username);// если нету "First" --> вернет больше одного пользователя
         if( userEntity != null)
         {
