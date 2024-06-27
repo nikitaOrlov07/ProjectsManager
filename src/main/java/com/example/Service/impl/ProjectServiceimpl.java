@@ -80,4 +80,9 @@ public class ProjectServiceimpl implements ProjectService {
         return ProjectMapper.projectToProjectDto(project) ;
     }
 
+    @Override
+    public Project findProjectByChat(Chat chat) {
+        return projectRepository.findProjectByChat(chat);
+    }
+
 }

@@ -2,12 +2,16 @@ package com.example.Service.impl;
 
 import com.example.Model.Chat;
 import com.example.Model.Message;
+import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
 import com.example.Repository.ChatRepository;
 import com.example.Repository.MessageRepository;
 import com.example.Service.ChatService;
 import com.example.Service.MessageService;
+import com.example.Service.ProjectService;
 import com.example.Service.Security.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -26,10 +30,16 @@ public class ChatServiceimpl implements ChatService {
     @Lazy // Create a bean only when program will need it.
     @Autowired
     private UserService userService;
-
+    @Lazy
+    @Autowired
+    private ProjectService projectService;
     @Lazy
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private MessageRepository messageRepository;
+
     @Transactional
     @Override
     public Optional<Chat> findById(Long chatId) {
@@ -98,6 +108,7 @@ public class ChatServiceimpl implements ChatService {
                 messageService.deleteMessage(message, message.getUser(), chat);
             }
         }
+
         chatRepository.delete(chat);
     }
     @Override
@@ -105,18 +116,26 @@ public class ChatServiceimpl implements ChatService {
         return chatRepository.findByParticipantsContains(deletedUser);
     }
 
-    @Override
     @Transactional
+    @Override
     public void clearMessages(Chat chat) {
+        chat = chatRepository.findById(chat.getId()).orElseThrow(() -> new EntityNotFoundException("Chat not found"));
+
         List<Message> messages = new ArrayList<>(chat.getMessages());
-        for(Message message : messages) {
-            UserEntity user = message.getUser();
-            if (user != null) {
-                user.getMessages().remove(message);
-            }
+        for (Message message : messages) {
+            message.setUser(null);
+            message.setChat(null);
             chat.getMessages().remove(message);
-            messageService.deleteMessage(message,message.getUser(),chat);
+            messageRepository.delete(message);
         }
+
+        chat.getMessages().clear();
         chatRepository.save(chat);
+
+        Project project = chat.getProject();
+        if (project != null) {
+            project.setChat(chat);
+            projectService.save(project);
+        }
     }
 }

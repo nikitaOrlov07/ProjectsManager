@@ -2,12 +2,5 @@ Project manager
 календарь
 на главную страницу можно добавить список пользователей , где изначально будут отображены только 10 пользователей (последних созданных , или смотря по городу) но можно будет ввести в поиск nick и найти кого надо и добавить  в друзья
 Можно добавить категории проэктов
-ГЛАВНАЯ ПРОБЛЕМА : НАДО СДЕЛАТЬ НАСТРОИТЬ ВЕБСОКЕТ ЧАТЫ ДЛЯ ПРОЭЕКТОВ , УЖЕ КАК ТОЛЬКО
-ЗАХОЖУ В ЧАТ ПОЯВЛЯЕТСЯ ТАКАЯ ПРОБЛЕМА
-
-java.util.NoSuchElementException: No value present
-	at java.base/java.util.Optional.orElseThrow(Optional.java:377) ~[na:na]
-	at com.example.Controller.ChatController.addUser(ChatController.java:141) ~[classes/:na]
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+ГЛАВНАЯ ПРОБЛЕМА : при очищении чата для проэкта - сообщения не удаляются с дб, хотя со стороны сервера вроде все правильно
 

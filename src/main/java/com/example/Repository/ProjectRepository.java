@@ -1,5 +1,6 @@
 package com.example.Repository;
 
+import com.example.Model.Chat;
 import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
 import org.springframework.data.domain.Page;
@@ -17,5 +18,6 @@ public interface ProjectRepository  extends JpaRepository<Project,Long> {
 
     @Query("SELECT p FROM UserEntity u JOIN u.currentProjects p WHERE p.name LIKE CONCAT('%', :query, '%')")
     List<Project> searchUserProjects(@Param("query") String query);
+    Project findProjectByChat (Chat chat);
 
 }

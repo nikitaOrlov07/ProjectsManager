@@ -7,6 +7,7 @@ import com.example.Repository.MessageRepository;
 import com.example.Service.ChatService;
 import com.example.Service.MessageService;
 import com.example.Service.Security.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -40,11 +41,13 @@ public class MessageServiceimpl implements MessageService {
     public Optional<Message> findById(Long message) {
         return messageRepository.findById(message);
     }
+    @Transactional
     @Override
-    public void deleteMessage(Message message, UserEntity user , Chat chat) {
+    public void deleteMessage(Message message, UserEntity user, Chat chat) {
         user.getMessages().remove(message);
         chat.getMessages().remove(message);
         messageRepository.delete(message);
+        System.out.println("Deleted message: " + message.getId());
     }
     
 }

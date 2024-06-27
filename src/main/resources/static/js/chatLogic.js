@@ -23,12 +23,15 @@ document.addEventListener('DOMContentLoaded', function() {
             sendMessage();
         });
 
-        document.getElementById('deleteChatForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (confirmDelete()) {
-                deleteChat();
-            }
-        });
+        const deleteChatForm = document.getElementById('deleteChatForm');
+        if (deleteChatForm) {
+            deleteChatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (confirmDelete()) {
+                    deleteChat();
+                }
+            });
+        }
 
         document.getElementById('clearChatForm').addEventListener('submit', function(e) {
             e.preventDefault();

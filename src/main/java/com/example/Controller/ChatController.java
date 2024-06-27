@@ -74,15 +74,15 @@ public class ChatController {
     public String getChat(@PathVariable("chatId") Long chatId,
                           Model model,
                           @PathVariable("projectId") Long projectId) throws JsonProcessingException {
-        List<Message> messages = messageService.findAllChatMessage(chatId);
         UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
         Project project = projectService.findById(projectId);
+        List<Message> messages = project.getChat().getMessages();
         if (SecurityUtil.getSessionUser() == null || SecurityUtil.getSessionUser().isEmpty() || (!project.getInvolvedUsers().contains(currentUser))) {
             return "redirect:/home";
         }
         model.addAttribute("messages", messages);
         model.addAttribute("messagesJson", new ObjectMapper().writeValueAsString(messages));
-
+        model.addAttribute("chat",project.getChat());
         model.addAttribute("user", currentUser);
         return "chat";
     }
@@ -99,6 +99,7 @@ public class ChatController {
         model.addAttribute("messagesJson", new ObjectMapper().writeValueAsString(messages));
         model.addAttribute("user", currentUser);
         model.addAttribute("participants", chat.getParticipants().remove(currentUser));
+        model.addAttribute("chat",chat);
         return "chat";
     }
 
@@ -128,12 +129,13 @@ public class ChatController {
         String username = message.getAuthor();
         headerAccessor.getSessionAttributes().put("username", username);
 
-
         UserEntity currentUser = userService.findByUsername(username);
         Chat chat = chatService.findById(chatId).orElseThrow();
 
+        Project project = projectService.findProjectByChat(chat);
+
         // Check if the user is already in the chat
-        if (!chat.getParticipants().contains(currentUser)) {
+        if (!chat.getParticipants().contains(currentUser) && project == null) {
             UserEntity otherUser = userService.findById(
                     chat.getParticipants().stream()
                             .filter(u -> !u.getUsername().equals(username))
@@ -215,18 +217,26 @@ public class ChatController {
     public Message clearChat(@DestinationVariable Long chatId,
                              SimpMessageHeaderAccessor headerAccessor) {
         String username = (String) headerAccessor.getSessionAttributes().get("username");
-        UserEntity user = userService.findByUsername(username);
+        UserEntity currentUser = userService.findByUsername(username);
         Chat chat = chatService.findById(chatId).orElseThrow();
+        Project project  = projectService.findProjectByChat(chat);
 
         // implement "List.contains()" logic -> if i use regular contains method -> won`t working
         boolean userInChat = chat.getParticipants().stream()
-                .anyMatch(participant -> participant.getId().equals(user.getId()));
+                .anyMatch(participant -> participant.getId().equals(currentUser.getId()));
 
-        boolean chatInUserChats = user.getChats().stream()
+        boolean chatInUserChats = currentUser.getChats().stream()
                 .anyMatch(userChat -> userChat.getId().equals(chat.getId()));
 
+        boolean userInProject = false;
+        if(project != null) {
+          userInProject = project.getInvolvedUsers().stream()
+                    .anyMatch(user -> user.getId().equals(currentUser.getId()));
+
+        }
+
         logger.info("Chat clearing controller method is working");
-        if (chat != null && chatInUserChats && userInChat) {
+        if (chat != null && ((chatInUserChats && userInChat) || (project != null && userInProject))) {
             chatService.clearMessages(chat);
             return Message.builder()
                     .type(MessageType.CLEAR)
@@ -234,6 +244,7 @@ public class ChatController {
                     .text("Chat was cleared")
                     .build();
         }
+
 
         logger.warn("Chat clearing failed");
         return null;

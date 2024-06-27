@@ -1,6 +1,7 @@
 package com.example.Service;
 
 import com.example.Dto.ProjectDto;
+import com.example.Model.Chat;
 import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
 
@@ -19,4 +20,6 @@ public interface ProjectService {
     void delete(Project project);
 
     ProjectDto createProject(ProjectDto projectDto, UserEntity user);
+
+    Project findProjectByChat(Chat chat);
 }
