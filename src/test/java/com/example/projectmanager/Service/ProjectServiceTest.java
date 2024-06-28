@@ -1,4 +1,4 @@
-package com.example.projectmanager.Services;
+package com.example.projectmanager.Service;
 
 import com.example.Dto.ProjectDto;
 import com.example.Model.Chat;
@@ -15,13 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 
-import java.security.Security;
 import java.util.*;
 
 import static org.mockito.Mockito.*;

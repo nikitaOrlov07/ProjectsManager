@@ -37,9 +37,6 @@ public class ChatServiceimpl implements ChatService {
     @Autowired
     private MessageService messageService;
 
-    @Autowired
-    private MessageRepository messageRepository;
-
     @Transactional
     @Override
     public Optional<Chat> findById(Long chatId) {
@@ -71,8 +68,6 @@ public class ChatServiceimpl implements ChatService {
         newChat.addParticipant(currentUser);
         newChat.addParticipant(secondUser);
 
-
-
         // create new chat
         chatRepository.save(newChat);
         if((currentUser.getChats().contains(newChat) && secondUser.getChats().contains(newChat)) &&  (newChat.getParticipants().contains(currentUser) && (newChat.getParticipants().contains(secondUser))))
@@ -95,18 +90,24 @@ public class ChatServiceimpl implements ChatService {
     @Transactional
     @Override
     public void delete(Chat chat) {
-        List<UserEntity> participants = new ArrayList<>(chat.getParticipants());
-        for (UserEntity user : participants) {
-            user.getChats().remove(chat);
-            chat.getParticipants().remove(user);
+        if (chat.getParticipants() != null) {
+            List<UserEntity> participants = new ArrayList<>(chat.getParticipants());
+            for (UserEntity user : participants) {
+                if (user.getChats() != null) {
+                    user.getChats().remove(chat);
+                }
+                chat.getParticipants().remove(user);
+            }
         }
 
-        List<Message> messagesToDelete = new ArrayList<>(chat.getMessages()); // create a copy of message list and then we can  iterate  and safely modify the original collection
-        for (Message message : messagesToDelete) {
-            messageService.deleteMessage(message, message.getUser(), chat);
+        if (chat.getMessages() != null) {
+            List<Message> messagesToDelete = new ArrayList<>(chat.getMessages());
+            for (Message message : messagesToDelete) {
+                messageService.deleteMessage(message, message.getUser(), chat);
+            }
+            chat.getMessages().clear();
         }
 
-        chat.getMessages().clear();
         chatRepository.delete(chat);
     }
     @Override
@@ -122,10 +123,8 @@ public class ChatServiceimpl implements ChatService {
 
         List<Message> messages = new ArrayList<>(managedChat.getMessages());
         for (Message message : messages) {
-            message.setUser(null);
-            message.setChat(null);
             managedChat.getMessages().remove(message);
-            messageRepository.delete(message);
+            messageService.deleteMessage(message,message.getUser(),chat);
         }
 
         managedChat.getMessages().clear();

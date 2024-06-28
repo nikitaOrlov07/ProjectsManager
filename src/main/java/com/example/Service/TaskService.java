@@ -9,7 +9,7 @@ import java.util.List;
 public interface TaskService {
     Task findById(Long taskId);
 
-    void save(Task task);
+    Task save(Task task);
 
     void delete(List<Task> tasks);
 }

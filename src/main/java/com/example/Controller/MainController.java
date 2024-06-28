@@ -28,15 +28,14 @@ import java.util.Map;
 
 @Controller
 public class MainController {
-    private ProjectService projectService; private UserService userService; private TaskService taskService;
+    private ProjectService projectService; private UserService userService;
     private AttachmentService attachmentService;
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     @Autowired
-    public MainController(ProjectService projectService, UserService userService,TaskService taskService,AttachmentService attachmentService) {
+    public MainController(ProjectService projectService, UserService userService,AttachmentService attachmentService) {
         this.projectService = projectService;
         this.userService = userService;
-        this.taskService = taskService;
         this.attachmentService = attachmentService;
 
     }
@@ -102,7 +101,7 @@ public class MainController {
     }
     //------------------------------------------------------------ Search projects-----------------------------------------------------------------
     @GetMapping("/home/find")
-    public String searchUser(@RequestParam(value = "query", defaultValue = " ") String query,
+    public String search(@RequestParam(value = "query", defaultValue = " ") String query,
                              Model model,
                              @RequestParam(value = "type", defaultValue = " ") String type) {
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());

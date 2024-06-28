@@ -1,18 +1,13 @@
-package com.example.projectmanager.Services;
+package com.example.projectmanager.Service;
 
 import com.example.Config.MessageType;
 import com.example.Model.Chat;
 import com.example.Model.Message;
-import com.example.Model.Project;
 import com.example.Model.Security.UserEntity;
 import com.example.Repository.MessageRepository;
-import com.example.Repository.ProjectRepository;
 import com.example.Repository.Security.UserRepository;
-import com.example.Security.SecurityUtil;
 import com.example.Service.ChatService;
-import com.example.Service.TaskService;
 import com.example.Service.impl.MessageServiceimpl;
-import com.example.Service.impl.ProjectServiceimpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.plugins.MockitoPlugins;
-import org.springframework.security.core.Authentication;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

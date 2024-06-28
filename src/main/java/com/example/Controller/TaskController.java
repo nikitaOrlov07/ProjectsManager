@@ -40,16 +40,18 @@ public class TaskController {
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
         Task task = taskService.findById(taskId);
         if(user == null || !task.getProject().getInvolvedUsers().contains(user))
-        {return "redirect:/home";}
-        System.out.println("Task name: " + task.getName() + " Current Task status: " + task.isComplete());
-        task.setComplete(complete); // Устанавливаем значение, переданное с клиента
-        taskService.save(task); // Сохраняем задачу
-        System.out.println("After change: Task name: " + task.getName() + " New Task status: " + task.isComplete());
-        return "redirect:/projects/" + task.getProject().getId(); // Перенаправление на страницу проекта
+        {
+            return "redirect:/home?operationError";
+        }
+        logger.info("Task name: {} Current Task status: {}", task.getName(), task.isComplete());
+        task.setComplete(complete); // Set the value passed from the client
+        taskService.save(task); // save this task
+        logger.info("After change: Task name: {} New Task status: {}", task.getName(), task.isComplete());
+        return "redirect:/projects/" + task.getProject().getId();
     }
     // Ajax validation
     @PostMapping("/tasks/create")
-    public ResponseEntity<String> ajaxCreateTask(@RequestBody TaskDto taskDto,
+    public ResponseEntity<String> createTask(@RequestBody TaskDto taskDto,
                                                  @RequestParam("projectId") Long projectId) {
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
         Project project = projectService.findById(projectId);
@@ -64,7 +66,7 @@ public class TaskController {
         logger.info("Task created");
         return ResponseEntity.ok("success");
     }
-    @PostMapping("projects/{projectId}/tasks/reset")
+    @PostMapping("/projects/{projectId}/tasks/reset")
     public String resetTasks(@PathVariable("projectId") Long projectId)
     {
         Project project = projectService.findById(projectId);

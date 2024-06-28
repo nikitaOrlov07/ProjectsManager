@@ -22,14 +22,14 @@ public class TaskServiceimpl implements TaskService {
     }
 
     @Override
-    public void save(Task task) {
-        taskRepository.save(task);
+    public Task save(Task task) {
+        return taskRepository.save(task);
     }
 
     @Transactional
     @Override
     public void delete(List<Task> tasks) {
         taskRepository.deleteAll();
-    }
+    } // it will delete only task in "taskList"
 
 }
