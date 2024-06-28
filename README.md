@@ -49,6 +49,7 @@ All features available to unauthenticated users, plus:
 - Backend: Java
 - Frontend: JavaScript, HTML, CSS
 - Real-time Communication: WebSocket
+- Also in the project there are a lot of JUNIT tests (Mockito was used). 
 
 ## Screenshots
 
