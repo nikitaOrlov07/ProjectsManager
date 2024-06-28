@@ -3,6 +3,7 @@ package com.example.Security;
 
 import com.example.Model.Security.UserEntity;
 import com.example.Repository.Security.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -23,6 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
     // configure "loadByUsername"
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {//It loads the user by username.
         //If the user is found, the method returns a UserDetails object that represents the user in the Spring Security context.
         //If the user is not found, the method throws a UsernameNotFoundException exception.

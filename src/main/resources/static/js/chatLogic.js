@@ -64,6 +64,10 @@ function handleChatDeleted() {
     if (deleteChatForm) {
         deleteChatForm.style.display = 'none';
     }
+    // Add a delay before redirecting
+    setTimeout(() => {
+        window.location.href = '/home?chatWasDeleted';
+    }, 2000); // after 2 second will redirect to home page with parametr
 }
 
 function handleChatCleared() {

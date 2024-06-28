@@ -281,7 +281,7 @@
         });
         $(document).ready(function() {
             $('#addTaskForm').submit(function(event) {
-                event.preventDefault(); // Предотвращаем стандартное поведение формы
+                event.preventDefault();
 
                 var name = $('input[name="name"]').val();
                 var description = $('textarea[name="description"]').val();

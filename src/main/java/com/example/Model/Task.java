@@ -1,5 +1,6 @@
 package com.example.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Task {
     private boolean complete;
     @ToString.Exclude
     @ManyToOne
+    @JsonBackReference // to eliminate recursion
     private Project project;
 
 

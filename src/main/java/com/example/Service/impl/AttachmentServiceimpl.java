@@ -28,33 +28,33 @@ public class AttachmentServiceimpl implements AttachmentService {
         this.userService = userService;
         this.attachmentRepository =  attachmentRepository;
     }
-    @Override
-    public Attachment saveAttachment(MultipartFile file, Project project, UserEntity user) throws Exception {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-        try {
-            if(fileName.contains("..")) {
-                throw new Exception("Filename contains invalid path sequence" + fileName);
+        @Override
+        public Attachment saveAttachment(MultipartFile file, Project project, UserEntity user) throws Exception {
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            try {
+                if(fileName.contains("..")) {
+                    throw new Exception("Filename contains invalid path sequence" + fileName);
+                }
+
+                Attachment attachment = new Attachment(fileName,
+                        file.getContentType(),
+                        file.getBytes(),
+                        null,
+                        null
+                );
+                attachment.setCreator(user.getUsername());
+                attachment.setProject(project);
+
+                LocalDateTime currentDateTime = LocalDateTime.now();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                attachment.setTimestamp(currentDateTime.format(formatter));
+
+                return attachmentRepository.save(attachment);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                throw new Exception("Could not save File: "+fileName);
             }
-
-            Attachment attachment = new Attachment(fileName,
-                    file.getContentType(),
-                    file.getBytes(),
-                    null,
-                    null
-            );
-            attachment.setCreator(user.getUsername());
-            attachment.setProject(project);
-
-            LocalDateTime currentDateTime = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            attachment.setTimestamp(currentDateTime.format(formatter));
-
-            return attachmentRepository.save(attachment);
-        } catch (Exception exception) {
-            exception.printStackTrace();
-            throw new Exception("Could not save File: "+fileName);
         }
-    }
     @Transactional
     @Override
     public void updateAttachmentUrls(Long id, String downloadUrl, String viewUrl) {

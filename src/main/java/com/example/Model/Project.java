@@ -2,6 +2,7 @@ package com.example.Model;
 
 import com.example.Model.Security.UserEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,8 @@ public class Project {
     @ManyToMany(mappedBy = "currentProjects", fetch = FetchType.EAGER)
     private List<UserEntity> involvedUsers = new ArrayList<>();
 
+    @ToString.Exclude
+    @JsonManagedReference // to eliminate recursion
     @OneToMany(mappedBy = "project",fetch = FetchType.EAGER,cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
 
@@ -38,6 +41,8 @@ public class Project {
     private Chat chat;
 
     @OneToMany(mappedBy = "project",fetch = FetchType.EAGER ,cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @JsonManagedReference // to eliminate recursion
     private List<Attachment> attachments = new ArrayList<>();
 
 }

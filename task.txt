@@ -2,5 +2,29 @@ Project manager
 календарь
 на главную страницу можно добавить список пользователей , где изначально будут отображены только 10 пользователей (последних созданных , или смотря по городу) но можно будет ввести в поиск nick и найти кого надо и добавить  в друзья
 Можно добавить категории проэктов
-ГЛАВНАЯ ПРОБЛЕМА : при очищении чата для проэкта - сообщения не удаляются с дб, хотя со стороны сервера вроде все правильно
+Проблема -> когда удаляю чат -> 2024-06-28T01:36:08.495+03:00  INFO 17064 --- [boundChannel-10] com.example.Controller.ChatController    : Delete chat controller method is working
+                                Deleted message: 4502
+                                2024-06-28T01:36:08.497+03:00 ERROR 17064 --- [boundChannel-10] .WebSocketAnnotationMethodMessageHandler : Unhandled exception from message handler method
 
+                                java.util.ConcurrentModificationException: null
+                                	at java.base/java.util.ArrayList$Itr.checkForComodification(ArrayList.java:1096) ~[na:na]
+                                	at java.base/java.util.ArrayList$Itr.next(ArrayList.java:1050) ~[na:na]
+                                	at org.hibernate.collection.spi.AbstractPersistentCollection$IteratorProxy.next(AbstractPersistentCollection.java:920) ~[hibernate-core-6.4.4.Final.jar:6.4.4.Final]
+                                	at com.example.Service.impl.ChatServiceimpl.delete(ChatServiceimpl.java:107) ~[classes/:na]
+                                	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+                                	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+                                	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:351) ~[spring-aop-6.1.5.jar:6.1.5]
+                                	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196) ~[spring-aop-6.1.5.jar:6.1.5]
+                                	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-6.1.5.jar:6.1.5]
+                                	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:765) ~[spring-aop-6.1.5.jar:6.1.5]
+                                	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123) ~[spring-tx-6.1.5.jar:6.1.5]
+                                	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:392) ~[spring-tx-6.1.5.jar:6.1.5]
+                                	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-6.1.5.jar:6.1.5]
+                                	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.5.jar:6.1.5]
+                                	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:765) ~[spring-aop-6.1.5.jar:6.1.5]
+                                	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:717) ~[spring-aop-6.1.5.jar:6.1.5]
+                                	at com.example.Service.impl.ChatServiceimpl$$SpringCGLIB$$0.delete(<generated>) ~[classes/:na]
+                                	at com.example.Controller.ChatController.deleteChat(ChatController.java:177) ~[classes/:na]
+                                	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+                                	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+                                	- решить зафигачить на gitchub и открыть проэкт

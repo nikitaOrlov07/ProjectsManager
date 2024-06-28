@@ -96,19 +96,17 @@ public class ChatServiceimpl implements ChatService {
     @Override
     public void delete(Chat chat) {
         List<UserEntity> participants = new ArrayList<>(chat.getParticipants());
-        if(participants != null && !participants.isEmpty()) {
-            for (UserEntity user : participants) {
-                user.getChats().remove(chat);
-                chat.getParticipants().remove(user);
-            }
-        }
-        List<Message> messages = chat.getMessages();
-        if(messages != null && !messages.isEmpty()) {
-            for (Message message : messages) {
-                messageService.deleteMessage(message, message.getUser(), chat);
-            }
+        for (UserEntity user : participants) {
+            user.getChats().remove(chat);
+            chat.getParticipants().remove(user);
         }
 
+        List<Message> messagesToDelete = new ArrayList<>(chat.getMessages()); // create a copy of message list and then we can  iterate  and safely modify the original collection
+        for (Message message : messagesToDelete) {
+            messageService.deleteMessage(message, message.getUser(), chat);
+        }
+
+        chat.getMessages().clear();
         chatRepository.delete(chat);
     }
     @Override
@@ -116,25 +114,25 @@ public class ChatServiceimpl implements ChatService {
         return chatRepository.findByParticipantsContains(deletedUser);
     }
 
-    @Transactional
+    @Transactional // In a @Transactional method, Hibernate automatically tracks changes to managed entities and persists them at the end of the transaction.
     @Override
     public void clearMessages(Chat chat) {
-        chat = chatRepository.findById(chat.getId()).orElseThrow(() -> new EntityNotFoundException("Chat not found"));
+        Chat managedChat = chatRepository.findById(chat.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Chat not found"));
 
-        List<Message> messages = new ArrayList<>(chat.getMessages());
+        List<Message> messages = new ArrayList<>(managedChat.getMessages());
         for (Message message : messages) {
             message.setUser(null);
             message.setChat(null);
-            chat.getMessages().remove(message);
+            managedChat.getMessages().remove(message);
             messageRepository.delete(message);
         }
 
-        chat.getMessages().clear();
-        chatRepository.save(chat);
+        managedChat.getMessages().clear();
 
-        Project project = chat.getProject();
+        Project project = managedChat.getProject();
         if (project != null) {
-            project.setChat(chat);
+            project.setChat(managedChat);
             projectService.save(project);
         }
     }

@@ -1,6 +1,7 @@
 package com.example.Model;
 
 import com.example.Model.Security.UserEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +34,7 @@ public class Attachment {
         this.viewUrl= viewUrl;
     }
     @ToString.Exclude
+    @JsonBackReference // to eliminate recursion
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", referencedColumnName = "id")
     private Project project;

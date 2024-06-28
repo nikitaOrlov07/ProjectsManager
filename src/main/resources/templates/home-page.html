@@ -35,7 +35,7 @@
 <div th:if="${param.friendInvitationdeclineSuccess != null}" class="alert alert-success" id="friendInvitationDecline">
     Friend invite was successfully declined
 </div>
-<div th:if="${param.chatDeleteSuccess != null}" class="alert alert-success" id="chatDelete">
+<div th:if="${param.chatWasDeleted != null}" class="alert alert-success" id="chatDelete">
     Chat was successfully deleted
 </div>
 <div class="container" style="margin-top: 10px">
@@ -341,6 +341,7 @@
         hideAlert('friendInvitationAdd');
         hideAlert('friendInvitationRemove');
         hideAlert('friendInvitationDecline');
+        hideAlert('chatDelete');
     });
 </script>
 </body>
