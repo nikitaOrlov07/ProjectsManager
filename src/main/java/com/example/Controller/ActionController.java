@@ -99,7 +99,7 @@ public class ActionController {
     }
     // update project
     @GetMapping("/projects/{projectId}/update")
-    public String updateNews(Model model, @PathVariable("projectId") Long projectId) {
+    public String updateProject(Model model, @PathVariable("projectId") Long projectId) {
         UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
         Project project = projectService.findById(projectId);
         if (currentUser == null || !project.getInvolvedUsers().contains(currentUser))
@@ -108,19 +108,34 @@ public class ActionController {
         }
         ProjectDto projectDto = ProjectMapper.projectToProjectDto(project);
         model.addAttribute("projectDto", projectDto);
+        model.addAttribute("projectId", projectId);
         return "project-update";
     }
 
 
-    @PostMapping(value = "/news/update/save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String updateNews(@Valid @RequestBody ProjectDto projectDto) {
-        String username = SecurityUtil.getSessionUser();
-        if (username == null || !userService.findByUsername(username).hasAdminRole()) // if the user is not authorized and don`t have admin role
-        {
-            return "redirect:/news";
+    @PostMapping("/projects/update/save")
+    public String updateProject(@Valid ProjectDto projectDto, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("projectDto", projectDto);
+            return "project-update";
         }
-        projectService.save(ProjectMapper.projectDtotoProject(projectDto));
-        return "redirect:/projects/"+projectDto.getId();
+
+        String username = SecurityUtil.getSessionUser();
+        Project existingProject = projectService.findById(projectDto.getId());
+
+        if (username == null || !existingProject.getInvolvedUsers().contains(userService.findByUsername(username))) {
+            return "redirect:/home?operationError";
+        }
+        existingProject.setName(projectDto.getName());
+        existingProject.setDescription(projectDto.getDescription());
+        existingProject.setCategory(projectDto.getCategory());
+        existingProject.setStartDate(projectDto.getStartDate() != null ? projectDto.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null);
+        existingProject.setEndDate(projectDto.getEndDate() != null ? projectDto.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null);
+        existingProject.setPassword(projectDto.getPassword());
+
+
+        projectService.save(existingProject);
+        return "redirect:/projects/" + existingProject.getId();
     }
     // delete project
     @PostMapping("/projects/{projectId}/delete")

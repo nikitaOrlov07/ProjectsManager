@@ -78,6 +78,13 @@ public class TaskControllerTest {
                 .description("taskDescription")
                 .project(project)
                 .build();
+        taskDto = TaskDto.builder()
+                .id(1L)
+                .complete(false)
+                .name("taskDtoName")
+                .description("taskDtoDescription")
+                .project(project)
+                .build();
         project.getInvolvedUsers().add(user);
         project.getTasks().add(task);
     }
@@ -116,10 +123,10 @@ public class TaskControllerTest {
 
 
     }
-/*
+
     @Test
     @WithMockUser(username = "username")
-    public void TaskController_ createTask_Success() throws Exception {
+    public void TaskController_createTask_Success() throws Exception {
         when(userService.findByUsername("username")).thenReturn(user);
         when(projectService.findById(1L)).thenReturn(project);
         when(taskService.save(Mockito.any(Task.class))).thenReturn(new Task());
@@ -133,10 +140,9 @@ public class TaskControllerTest {
 
         Mockito.verify(taskService, Mockito.times(1)).save(Mockito.any(Task.class));
     }
-    - Expected :200
-    Actual   :400
 
- */
+
+
 
 
 

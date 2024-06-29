@@ -42,7 +42,7 @@ public class AttachmentServiceTest {
     private UserEntity user;
     private Project project;
 
-    private Attachment attachment;
+
 
     @BeforeEach
     public void setUp() throws IOException {
