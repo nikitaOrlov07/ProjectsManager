@@ -91,12 +91,15 @@ public class MainController {
         Project project = projectService.findById(projectId);
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
         List<Attachment> attachments = attachmentService.findAllByProject(project);
+        Long remainingDays = projectService.getRemainingDays(project.getEndDate());
         attachments.forEach(attachment -> logger.info("File name: " + attachment.getFileName()));
         model.addAttribute("user", user);
         model.addAttribute("project", project);
         model.addAttribute("tasks", project.getTasks());
         model.addAttribute("taskDto",new TaskDto());
+        model.addAttribute("remainingDays",remainingDays);
         model.addAttribute("files", attachments);
+
         return "detail-page";
     }
     //------------------------------------------------------------ Search projects-----------------------------------------------------------------

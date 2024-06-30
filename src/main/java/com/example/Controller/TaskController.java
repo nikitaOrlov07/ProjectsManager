@@ -39,7 +39,7 @@ public class TaskController {
     public String completeTask(@PathVariable("taskId") Long taskId, @RequestParam("complete") boolean complete) {
         UserEntity user = userService.findByUsername(SecurityUtil.getSessionUser());
         Task task = taskService.findById(taskId);
-        if(user == null || !task.getProject().getInvolvedUsers().contains(user))
+        if(user == null && !task.getProject().getInvolvedUsers().contains(user) && !user.hasAdminRole())
         {
             return "redirect:/home?operationError";
         }

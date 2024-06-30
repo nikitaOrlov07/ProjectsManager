@@ -50,7 +50,6 @@ public class UserServiceimpl implements UserService{
 
         RoleEntity role = roleRepository.findByName("USER");// по факту "USER"  записывается в переменную role (- В этой строке мы ищем объект RoleEntity, представляющий роль "USER" в системе.)
         userEntity.setRoles(Arrays.asList(role));// даем нашему userEntity (юзеру) роль "USER" (мы назначаем найденную роль "USER" пользователю, устанавливая список ролей пользователя в качестве списка,
-        // содержащего только одну роль "USER".)
         //----------------------------------------------------------------
         userRepository.save(userEntity);
     }

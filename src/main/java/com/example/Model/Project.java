@@ -25,6 +25,7 @@ public class Project {
     private String startDate;
     private String endDate;
     private  String password;
+
     @ToString.Exclude
     @JsonIgnore
     @ManyToMany(mappedBy = "currentProjects", fetch = FetchType.EAGER)

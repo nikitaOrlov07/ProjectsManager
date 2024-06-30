@@ -13,6 +13,9 @@ import com.example.mappers.ProjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -84,5 +87,26 @@ public class ProjectServiceimpl implements ProjectService {
     public Project findProjectByChat(Chat chat) {
         return projectRepository.findProjectByChat(chat);
     }
+
+    @Override
+    public Long getRemainingDays(String endDateString) {
+
+        if(endDateString != null && !endDateString.isEmpty())
+        {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate endDate = LocalDate.parse(endDateString, formatter);
+            LocalDate today = LocalDate.now();
+            Long result = ChronoUnit.DAYS.between(today, endDate); // get remaining days
+            if(isNonNegative(result))
+                return result;
+        }
+
+        return null;
+    }
+    public boolean isNonNegative(Long number) {
+        return Long.signum(number) >= 0;
+    }
+
+
 
 }

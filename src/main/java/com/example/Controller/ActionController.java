@@ -23,6 +23,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -102,6 +103,9 @@ public class ActionController {
     public String updateProject(Model model, @PathVariable("projectId") Long projectId) {
         UserEntity currentUser = userService.findByUsername(SecurityUtil.getSessionUser());
         Project project = projectService.findById(projectId);
+
+
+
         if (currentUser == null || !project.getInvolvedUsers().contains(currentUser))
         {
             return "redirect:/home?operationError";
@@ -123,14 +127,14 @@ public class ActionController {
         String username = SecurityUtil.getSessionUser();
         Project existingProject = projectService.findById(projectDto.getId());
 
-        if (username == null || !existingProject.getInvolvedUsers().contains(userService.findByUsername(username))) {
+        if (username == null  || !existingProject.getInvolvedUsers().contains(userService.findByUsername(username))) {
             return "redirect:/home?operationError";
         }
         existingProject.setName(projectDto.getName());
         existingProject.setDescription(projectDto.getDescription());
         existingProject.setCategory(projectDto.getCategory());
-        existingProject.setStartDate(projectDto.getStartDate() != null ? projectDto.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null);
-        existingProject.setEndDate(projectDto.getEndDate() != null ? projectDto.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null);
+        existingProject.setStartDate(projectDto.getStartDate() != null ? projectDto.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : existingProject.getStartDate());
+        existingProject.setEndDate(projectDto.getEndDate() != null ? projectDto.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : existingProject.getEndDate());
         existingProject.setPassword(projectDto.getPassword());
 
 

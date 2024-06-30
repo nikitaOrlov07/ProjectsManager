@@ -22,4 +22,5 @@ public interface ProjectService {
     ProjectDto createProject(ProjectDto projectDto, UserEntity user);
 
     Project findProjectByChat(Chat chat);
+    Long getRemainingDays(String endDate);
 }

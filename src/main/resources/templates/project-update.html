@@ -2,7 +2,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
 <head>
-    <title>News Create</title>
+    <title>Project Update</title>
     <style>
         .text-color
         {
@@ -77,6 +77,7 @@
                                 id="startDate"
                                 name="startDate"
                                 th:field="*{startDate}"
+                                th:value="${#temporals.format(projectDto.startDate, 'yyyy-MM-dd')}"
                                 placeholder="start date">
                         <p th:if="${#fields.hasErrors('startDate')}" class="text-danger" th:errors="*{startDate}"></p>
                     </div>
@@ -88,6 +89,7 @@
                                 id="endDate"
                                 name="endDate"
                                 th:field="*{endDate}"
+                                th:value="${#temporals.format(projectDto.endDate, 'yyyy-MM-dd')}"
                                 placeholder="end date">
                         <p th:if="${#fields.hasErrors('endDate')}" class="text-danger" th:errors="*{endDate}"></p>
                     </div>
