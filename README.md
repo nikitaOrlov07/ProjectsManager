@@ -45,6 +45,9 @@ All features available to unauthenticated users, plus:
 ### 🔍 Additional Features
 - Comprehensive logging throughout the application
 
+### Roles
+There are two roles in the project (admin and user): admin has the ability to view all information about the project (assigned tasks,add tasks, see participants, see attached files) without participating in it.
+
 ## 🛠️ Technologies Used
 - Backend: Java
 - Frontend: JavaScript, HTML, CSS
@@ -66,4 +69,7 @@ All features available to unauthenticated users, plus:
 ### Login and Register Pages
 ![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/5b8cea26-5de0-4d88-9fe5-af80fdfe55e3)
 *page where you can login or create a new account.*
+### Create and Update pages
+![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/ffe91584-6559-43b0-8f9e-65fd07b5bb33)
+*user can create a new project, or update the project he's a member of.*
 
