@@ -60,7 +60,7 @@ There are two roles in the project (admin and user): admin has the ability to vi
 ![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/ce4ef788-5c00-4638-bc8b-7db0d791c3bb)
 *main page in the application where all the necessary information is located.*
 ### Detail page
-![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/d8adab55-cb86-4653-bfea-e65277ebfbdf)
+![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/8b406cbd-8747-4b12-bc7a-0c1db75410d4)
 ![image](https://github.com/nikitaOrlov07/ProjectsManager/assets/145924436/3097e4d3-4a62-4167-b4c3-f36cb9aa10b1)
 *page where the project is being worked on.*
 ### Chat page
