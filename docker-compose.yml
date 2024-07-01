@@ -3,6 +3,7 @@ version: '3.8' # dont necessary to specify
 volumes:
   postgres:
 services:
+
   #for database
   postgres-server:
     container_name: postgres-sql3
@@ -18,12 +19,37 @@ services:
     # use named volume
     volumes:
       - postgres:/var/lib/postgres/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # execute init.sql file for database initial setup
     # create a new network
     networks:
       - spring-boot-network
     #restart
     restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # for init setup
+  postgres-init:
+    image: postgres
+    depends_on:
+      postgres-server:
+        condition: service_healthy
+    volumes:
+      - ./init.sql:/init.sql
+    command: >
+      bash -c "
+        echo 'Waiting for postgres...' &&
+        while ! pg_isready -h postgres-server -p 5432 -U postgres; do
+          sleep 1;
+        done &&
+        echo 'PostgreSQL is up - executing init script' &&
+        PGPASSWORD=07022005 psql -h postgres-server -U postgres -d projectManager -f /init.sql
+      "
+    environment:
+      - POSTGRES_PASSWORD=07022005
+    networks:
+      - spring-boot-network
   #for application
   projectmanager1-boot-app:
     build: . # if we have already built this image we use image: name_of_image , if we don't have the image --> build: . (it will build image by dockerFile)
@@ -38,7 +64,8 @@ services:
       postgres-server-username: 'postgres'  # username for getting access into database
       postgres-server-password: '07022005'  # password for getting access into database
     depends_on:
-      - postgres-server
+      postgres-server:
+        condition: service_healthy # Ожидание готовности postgres-server
 networks:
   spring-boot-network:
     driver: bridge

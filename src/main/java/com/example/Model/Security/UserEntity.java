@@ -21,14 +21,14 @@ import java.util.Objects;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class UserEntity {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.IDENTITY )
     private Long id;
     private String username;
     private String email;
     private String password;
     private String town;
     private Long phoneNumber;
-    private int roleId; //{0,1}
+    private int roleId; // {0,1}
     String creationDate;
 
     @ToString.Exclude

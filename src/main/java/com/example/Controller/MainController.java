@@ -93,6 +93,7 @@ public class MainController {
         List<Attachment> attachments = attachmentService.findAllByProject(project);
         Long remainingDays = projectService.getRemainingDays(project.getEndDate());
         attachments.forEach(attachment -> logger.info("File name: " + attachment.getFileName()));
+        System.out.println("user is Admin : " + user.hasAdminRole());
         model.addAttribute("user", user);
         model.addAttribute("project", project);
         model.addAttribute("tasks", project.getTasks());
