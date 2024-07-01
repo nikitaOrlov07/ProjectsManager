@@ -52,7 +52,9 @@ There are two roles in the project (admin and user): admin has the ability to vi
 - Backend: Java
 - Frontend: JavaScript, HTML, CSS
 - Real-time Communication: WebSocket
-- Also in the project there are a lot of JUNIT tests (Mockito was used). 
+- Docker: when docker containers are created -> an admin account will be automatically created in the database (via init.sql file)
+- Also in the project there are a lot of JUNIT tests (Mockito was used).
+  
 
 ## Screenshots
 
