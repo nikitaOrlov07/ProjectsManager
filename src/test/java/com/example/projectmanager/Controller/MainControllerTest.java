@@ -2,7 +2,9 @@ package com.example.projectmanager.Controller;
 
 
 import com.example.Controller.MainController;
+import com.example.Model.Chat;
 import com.example.Model.Project;
+import com.example.Model.Security.RoleEntity;
 import com.example.Model.Security.UserEntity;
 import com.example.Service.AttachmentService;
 import com.example.Service.ProjectService;
@@ -49,11 +51,16 @@ public class MainControllerTest {
     private TaskService taskService;
     @MockBean
     private AttachmentService attachmentService;
-    private Project project; private UserEntity user;
+    private Project project; private UserEntity user; private RoleEntity adminRole;private Chat chat;
     private  Authentication authentication = mock(Authentication.class);
     @BeforeEach
     private void init()
     {
+        chat = Chat.builder()
+                .id(1L)
+                .messages(new ArrayList<>())
+                .project(project)
+                .build();
         project = Project.builder()
                 .id(1L)
                 .name("projectName")
@@ -62,6 +69,7 @@ public class MainControllerTest {
                 .attachments(new ArrayList<>())
                 .tasks(new ArrayList<>())
                 .involvedUsers(new ArrayList<>())
+                .chat(chat)
                 .build();
         user = UserEntity.builder()
                 .id(1L)
@@ -69,8 +77,16 @@ public class MainControllerTest {
                 .password("password")
                 .email("email")
                 .chats(new ArrayList<>())
+                .roles(new ArrayList<>())
                 .build();
 
+        adminRole= RoleEntity.builder()
+                .id(1L)
+                .name("ADMIN")
+                .users(new ArrayList<>())
+                .build();
+
+        user.getRoles().add(adminRole);
         project.getInvolvedUsers().add(user);
     }
     @Test
@@ -100,6 +116,7 @@ public class MainControllerTest {
         when(authentication.getName()).thenReturn("username");
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        when(userService.findByUsername("username")).thenReturn(user);
         when(projectService.findById(project.getId())).thenReturn(project);
 
         MvcResult result = mockMvc.perform(get("/projects/1"))

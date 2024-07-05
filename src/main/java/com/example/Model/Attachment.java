@@ -23,8 +23,10 @@ public class Attachment {
     private String timestamp;
 
 
-    @Lob // that a class property must be mapped to a larger object in the database.
-    private byte[] data ;
+     // that a class property must be mapped to a larger object in the database.
+     @Lob
+     @Column(columnDefinition = "oid")
+     private byte[] data;
 
     public Attachment(String fileName, String fileType, byte[] data, String downloadUrl ,String viewUrl) {
         this.fileName = fileName;
