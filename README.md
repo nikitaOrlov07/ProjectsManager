@@ -53,6 +53,7 @@ There are two roles in the project (admin and user): admin has the ability to vi
 - Frontend: JavaScript, HTML, CSS
 - Real-time Communication: WebSocket
 - Docker: when docker containers are created -> an admin account will be automatically created in the database (via init.sql file).
+- Kubernetes: when pods are created -> you can make set-up admin user by applying postgres-init-job.yaml after aplying postgres-deployment.yml file
 
   Admin user : USERNAME: ADMIN , PASSWORD: Admin
 - Also in the project there are a lot of JUNIT tests (Mockito was used).
