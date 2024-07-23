@@ -6,7 +6,6 @@ data:
   host: "postgres"
   name: "projectManager"
   init.sql: |
-    echo 'Starting initialization script'
     -- Create tables if they don't exist
     CREATE TABLE IF NOT EXISTS roles (
                                          id INT PRIMARY KEY,
@@ -47,10 +46,9 @@ data:
     
     -- Insert admin user
     INSERT INTO users (username, email, password, role_id, town, phone_number)
-    VALUES ('ADMIN', 'ADMIN', '$2a$10$CtnkjDK6RKEr8gu9e5KamOgy4E/7ThUgrWjw6SWxsm/8UmSDrKMoy', 1, 'Bratislava', 555555555555)
+    VALUES ('ADMIN', 'ADMIN@gmail.com', '$2a$10$CtnkjDK6RKEr8gu9e5KamOgy4E/7ThUgrWjw6SWxsm/8UmSDrKMoy', 1, 'Bratislava', 555555555555)
         ON CONFLICT (username) DO NOTHING;
     
     -- Insert into users_roles
     INSERT INTO users_role (user_id,role_id) VALUES (1,1);
     
-    echo 'Initialization script completed'
